@@ -44,14 +44,14 @@
 ## 🚀 **Quick Start**
 
 ### **Play Online:**
-🎮 **[Play HackNet Arena](https://your-vercel-url.vercel.app)**
+🎮 **[Play HackNet Arena](https://hacknetarena.vercel.app/)**
 
 ### **Local Development:**
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/hacknet-arena.git
-cd hacknet-arena
+git clone https://github.com/arjunjaincs/hacknetarena
+cd hacknetarena
 
 # Install dependencies
 npm install
@@ -62,9 +62,6 @@ npm run dev
 # Open browser
 http://localhost:3000
 ```
-
-### **Deploy to Vercel:**
-See [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md) for step-by-step guide!
 
 ---
 
@@ -244,13 +241,6 @@ firebase deploy
 
 ---
 
-## 📚 **Documentation**
-
-- **[Game Guide](GAME_GUIDE.md)** - How to play
-- **[Technical Docs](TECHNICAL_DOCS.md)** - Architecture & API
-- **[Project Complete](PROJECT_COMPLETE.md)** - Full feature list
-
----
 
 ## 🎓 **Educational Value**
 
@@ -341,30 +331,14 @@ MIT License - feel free to use for learning and projects!
 
 ---
 
-## 📞 **Support**
-
-- **Issues**: [GitHub Issues](https://github.com/yourusername/hacknet-arena/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/hacknet-arena/discussions)
-
----
-
 ## 🙏 **Acknowledgments**
 
 Built with:
-- React team for amazing framework
+- React for amazing framework
 - Firebase for backend services
 - Tailwind CSS for styling
 - Three.js for 3D graphics
 - Vercel for hosting
-
----
-
-## 📊 **Performance**
-
-- **Bundle Size**: < 500KB (gzipped)
-- **First Paint**: < 1.5s
-- **Interactive**: < 3.5s
-- **Lighthouse**: > 90
 
 ---
 
@@ -375,12 +349,10 @@ npm install
 npm run dev
 ```
 
-**Visit:** http://localhost:5173
-
 **Have fun and learn cybersecurity!** 🎮✨
 
 ---
 
-**Made with ❤️ by [Your Name]**
+**Made with ❤️ by Arjun Jain**
 
 ⭐ **Star this repo if you enjoyed the game!**
