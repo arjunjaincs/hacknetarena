@@ -197,6 +197,31 @@ export async function getSmartLeaderboard(userId, userScore) {
 }
 
 /**
+ * Get user's leaderboard stats
+ * @param {string} userId - User ID
+ * @returns {Promise<Object>} User's leaderboard stats
+ */
+export async function getUserLeaderboardStats(userId) {
+  if (!isFirebaseEnabled || !userId) {
+    return { bestScore: 0, totalScore: 0, gamesPlayed: 0, wins: 0 };
+  }
+  
+  try {
+    const userStatsRef = ref(database, `leaderboard/${userId}`);
+    const snapshot = await get(userStatsRef);
+    
+    if (snapshot.exists()) {
+      return snapshot.val();
+    } else {
+      return { bestScore: 0, totalScore: 0, gamesPlayed: 0, wins: 0 };
+    }
+  } catch (error) {
+    console.error('Error fetching user leaderboard stats:', error);
+    return { bestScore: 0, totalScore: 0, gamesPlayed: 0, wins: 0 };
+  }
+}
+
+/**
  * Mock leaderboard data for when Firebase is not configured
  */
 function getMockLeaderboard() {

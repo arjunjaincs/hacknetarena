@@ -162,6 +162,7 @@ function App() {
             onStartGame={handleStartGame} 
             isLoggedIn={isLoggedIn}
             playerName={playerName}
+            userId={userId}
           />
         )}
         

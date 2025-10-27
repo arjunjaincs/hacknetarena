@@ -5,12 +5,25 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { playClickSound, initAudio } from '../game/soundEffects';
+import { getUserLeaderboardStats } from '../firebase/leaderboard';
 
-export default function Home({ onStartGame, isLoggedIn = false, playerName: loggedInName = '' }) {
+export default function Home({ onStartGame, isLoggedIn = false, playerName: loggedInName = '', userId = null }) {
   const [selectedRole, setSelectedRole] = useState(null);
   const [playerName, setPlayerName] = useState('');
   const [showNameModal, setShowNameModal] = useState(false);
+  const [userStats, setUserStats] = useState(null);
   const inputRef = useRef(null);
+  
+  // Load user stats if logged in
+  useEffect(() => {
+    async function loadStats() {
+      if (userId) {
+        const stats = await getUserLeaderboardStats(userId);
+        setUserStats(stats);
+      }
+    }
+    loadStats();
+  }, [userId]);
   
   const handleRoleSelect = (role) => {
     initAudio(); // Initialize audio on first interaction
@@ -53,6 +66,26 @@ export default function Home({ onStartGame, isLoggedIn = false, playerName: logg
           <p className="text-gray-400">
             Learn cybersecurity through interactive gameplay
           </p>
+          
+          {/* User Stats Display */}
+          {isLoggedIn && userStats && userStats.totalScore > 0 && (
+            <div className="mt-6 inline-flex items-center gap-4 bg-dark-card border border-cyber-blue rounded-lg px-6 py-3">
+              <div className="text-center">
+                <div className="text-xs text-gray-400 font-medium">Best Score</div>
+                <div className="text-xl font-bold text-cyber-blue">{userStats.bestScore}</div>
+              </div>
+              <div className="h-8 w-px bg-gray-600"></div>
+              <div className="text-center">
+                <div className="text-xs text-gray-400 font-medium">Total Score</div>
+                <div className="text-xl font-bold text-cyber-purple">{userStats.totalScore}</div>
+              </div>
+              <div className="h-8 w-px bg-gray-600"></div>
+              <div className="text-center">
+                <div className="text-xs text-gray-400 font-medium">Games</div>
+                <div className="text-xl font-bold text-cyber-green">{userStats.gamesPlayed}</div>
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Game Description */}

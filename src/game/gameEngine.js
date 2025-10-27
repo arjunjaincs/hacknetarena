@@ -221,9 +221,27 @@ export function processRound(state, playerAction, aiAction) {
   // All actions for counter checking
   const allActions = [...HACKER_ACTIONS, ...DEFENDER_ACTIONS];
   
-  // Check energy
+  // Validate energy state
+  if (newState.energyHacker < 0 || newState.energyDefender < 0) {
+    console.error('Invalid energy state detected:', {
+      hacker: newState.energyHacker,
+      defender: newState.energyDefender
+    });
+    newState.energyHacker = Math.max(0, newState.energyHacker);
+    newState.energyDefender = Math.max(0, newState.energyDefender);
+  }
+  
+  // Check energy availability
   const hackerHasEnergy = newState.energyHacker >= hackerAction.energyCost;
   const defenderHasEnergy = newState.energyDefender >= defenderAction.energyCost;
+  
+  // Log energy check for debugging
+  if (!hackerHasEnergy) {
+    console.warn(`Hacker insufficient energy: ${newState.energyHacker}/${hackerAction.energyCost} for ${hackerAction.name}`);
+  }
+  if (!defenderHasEnergy) {
+    console.warn(`Defender insufficient energy: ${newState.energyDefender}/${defenderAction.energyCost} for ${defenderAction.name}`);
+  }
   
   // Check cooldowns
   const hackerOnCooldown = (newState.hackerCooldowns[hackerAction.id] || 0) > 0;
@@ -304,13 +322,27 @@ export function processRound(state, playerAction, aiAction) {
     newState.defenderStreak = 0;
   }
   
-  // Deduct energy
-  if (hackerHasEnergy) newState.energyHacker -= hackerAction.energyCost;
-  if (defenderHasEnergy) newState.energyDefender -= defenderAction.energyCost;
+  // Deduct energy FIRST
+  if (hackerHasEnergy) {
+    newState.energyHacker -= hackerAction.energyCost;
+  }
+  if (defenderHasEnergy) {
+    newState.energyDefender -= defenderAction.energyCost;
+  }
   
-  // FIXED: Regenerate energy (+15 per round)
-  newState.energyHacker = Math.min(MAX_ENERGY, newState.energyHacker + ENERGY_REGEN_PER_ROUND);
-  newState.energyDefender = Math.min(MAX_ENERGY, newState.energyDefender + ENERGY_REGEN_PER_ROUND);
+  // Regenerate energy AFTER deduction (+15 per round, but not exceeding max)
+  newState.energyHacker = Math.max(0, Math.min(MAX_ENERGY, newState.energyHacker + ENERGY_REGEN_PER_ROUND));
+  newState.energyDefender = Math.max(0, Math.min(MAX_ENERGY, newState.energyDefender + ENERGY_REGEN_PER_ROUND));
+  
+  // Validate energy never goes negative
+  if (newState.energyHacker < 0) {
+    console.error('Energy went negative for hacker:', newState.energyHacker);
+    newState.energyHacker = 0;
+  }
+  if (newState.energyDefender < 0) {
+    console.error('Energy went negative for defender:', newState.energyDefender);
+    newState.energyDefender = 0;
+  }
   
   // Set cooldowns
   if (hackerResult.success && hackerAction.cooldown > 0) {

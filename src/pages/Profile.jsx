@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { getUserGameHistory, getUserStats } from '../firebase/gameHistory';
+import { getUserLeaderboardStats } from '../firebase/leaderboard';
 
 export default function Profile({ userId, playerName, onBack }) {
   const [games, setGames] = useState([]);
   const [stats, setStats] = useState(null);
+  const [leaderboardStats, setLeaderboardStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
-      const [gamesData, statsData] = await Promise.all([
+      const [gamesData, statsData, lbStats] = await Promise.all([
         getUserGameHistory(userId, 20),
-        getUserStats(userId)
+        getUserStats(userId),
+        getUserLeaderboardStats(userId)
       ]);
       setGames(gamesData);
       setStats(statsData);
+      setLeaderboardStats(lbStats);
       setLoading(false);
     }
     if (userId) {
@@ -52,10 +56,10 @@ export default function Profile({ userId, playerName, onBack }) {
             <StatCard label="Wins" value={stats.wins} icon="🏆" color="green" />
             <StatCard label="Losses" value={stats.losses} icon="💔" color="red" />
             <StatCard label="Win Rate" value={`${stats.winRate}%`} icon="📊" />
-            <StatCard label="Best Score" value={stats.bestScore} icon="⭐" />
+            <StatCard label="Best Score" value={leaderboardStats?.bestScore || stats.bestScore} icon="⭐" color="cyan" />
+            <StatCard label="Total Score" value={leaderboardStats?.totalScore || 0} icon="💎" color="purple" />
             <StatCard label="Avg Score" value={stats.averageScore} icon="📈" />
             <StatCard label="Total Rounds" value={stats.totalRounds} icon="🔄" />
-            <StatCard label="Draws" value={stats.draws} icon="🤝" color="yellow" />
           </div>
         )}
 
