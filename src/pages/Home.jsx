@@ -44,7 +44,7 @@ export default function Home({ onStartGame, isLoggedIn = false, playerName: logg
       <div className="max-w-4xl w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 cyber-glow text-cyber-blue">
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 cyber-glow animated-gradient-text">
             HackNet Arena
           </h1>
           <p className="text-xl md:text-2xl text-gray-300 mb-2">

@@ -1,6 +1,6 @@
 /**
- * Leaderboard Page
- * Displays top scores from Firebase
+ * Leaderboard Page - Redesigned
+ * Shows unique players with their best score, total score, and recent game
  */
 
 import React, { useEffect, useState } from 'react';
@@ -8,43 +8,20 @@ import { getTopScores } from '../firebase/leaderboard';
 import { isFirebaseEnabled } from '../firebase/config';
 
 export default function Leaderboard({ onBack, currentUserId }) {
-  const [scores, setScores] = useState([]);
+  const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, hacker, defender
-  const [timeFilter, setTimeFilter] = useState('allTime'); // allTime, today, week, month
+  const [sortBy, setSortBy] = useState('bestScore'); // bestScore or totalScore
   
   useEffect(() => {
     loadScores();
-  }, []);
+  }, [sortBy]);
   
   const loadScores = async () => {
     setLoading(true);
-    const topScores = await getTopScores(50); // Get more scores for filtering
-    setScores(topScores);
+    const topPlayers = await getTopScores(20, sortBy);
+    setPlayers(topPlayers);
     setLoading(false);
   };
-  
-  // Filter scores based on role and time
-  const filteredScores = scores
-    .filter(s => filter === 'all' || s.role === filter)
-    .filter(s => {
-      if (timeFilter === 'allTime') return true;
-      const scoreDate = new Date(s.timestamp);
-      const now = new Date();
-      if (timeFilter === 'today') {
-        return scoreDate.toDateString() === now.toDateString();
-      }
-      if (timeFilter === 'week') {
-        const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
-        return scoreDate >= weekAgo;
-      }
-      if (timeFilter === 'month') {
-        const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
-        return scoreDate >= monthAgo;
-      }
-      return true;
-    })
-    .slice(0, 20); // Show top 20
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-dark-bg to-dark-card p-4 pt-40">
@@ -64,42 +41,14 @@ export default function Leaderboard({ onBack, currentUserId }) {
           )}
         </div>
         
-        {/* Filters */}
-        <div className="mb-6 space-y-4">
-          {/* Role Filter */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            <FilterButton active={filter === 'all'} onClick={() => setFilter('all')}>
-              All Roles
-            </FilterButton>
-            <FilterButton active={filter === 'hacker'} onClick={() => setFilter('hacker')}>
-              🎯 Hackers Only
-            </FilterButton>
-            <FilterButton active={filter === 'defender'} onClick={() => setFilter('defender')}>
-              🛡️ Defenders Only
-            </FilterButton>
-          </div>
-          
-          {/* Time Filter */}
-          <div className="flex flex-wrap gap-2 justify-center">
-            <FilterButton active={timeFilter === 'allTime'} onClick={() => setTimeFilter('allTime')}>
-              All Time
-            </FilterButton>
-            <FilterButton active={timeFilter === 'today'} onClick={() => setTimeFilter('today')}>
-              Today
-            </FilterButton>
-            <FilterButton active={timeFilter === 'week'} onClick={() => setTimeFilter('week')}>
-              This Week
-            </FilterButton>
-            <FilterButton active={timeFilter === 'month'} onClick={() => setTimeFilter('month')}>
-              This Month
-            </FilterButton>
-          </div>
-          
-          {/* Results Count */}
-          <div className="text-center text-sm text-gray-400">
-            Showing {filteredScores.length} {filter !== 'all' ? filter : 'player'}{filteredScores.length !== 1 ? 's' : ''}
-            {timeFilter !== 'allTime' && ` from ${timeFilter}`}
-          </div>
+        {/* Sort Toggle */}
+        <div className="mb-6 flex justify-center gap-2">
+          <FilterButton active={sortBy === 'bestScore'} onClick={() => setSortBy('bestScore')}>
+            🏆 Best Score
+          </FilterButton>
+          <FilterButton active={sortBy === 'totalScore'} onClick={() => setSortBy('totalScore')}>
+            📊 Total Score
+          </FilterButton>
         </div>
         
         {/* Leaderboard Table */}
@@ -109,70 +58,83 @@ export default function Leaderboard({ onBack, currentUserId }) {
               <div className="text-4xl mb-4">⏳</div>
               <div>Loading scores...</div>
             </div>
-          ) : scores.length === 0 ? (
+          ) : players.length === 0 ? (
             <div className="p-12 text-center text-gray-400">
               <div className="text-4xl mb-4">📊</div>
-              <div>No scores yet. Be the first to play!</div>
+              <div>No players yet. Be the first to play!</div>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full text-sm">
                 <thead className="bg-dark-bg border-b border-gray-600">
                   <tr>
-                    <th className="px-4 py-3 text-left text-cyber-blue">Rank</th>
-                    <th className="px-4 py-3 text-left text-cyber-blue">Player</th>
-                    <th className="px-4 py-3 text-left text-cyber-blue">Role</th>
-                    <th className="px-4 py-3 text-left text-cyber-blue">Result</th>
-                    <th className="px-4 py-3 text-right text-cyber-blue">Score</th>
+                    <th className="px-3 py-3 text-left text-cyber-blue font-bold">Rank</th>
+                    <th className="px-3 py-3 text-left text-cyber-blue font-bold">Player</th>
+                    <th className="px-3 py-3 text-left text-cyber-blue font-bold">Recent Game</th>
+                    <th className="px-3 py-3 text-right text-cyber-blue font-bold">Best</th>
+                    <th className="px-3 py-3 text-right text-cyber-blue font-bold">Total</th>
+                    <th className="px-3 py-3 text-center text-cyber-blue font-bold">W/L</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredScores.map((score, index) => (
+                  {players.map((player, index) => (
                     <tr 
-                      key={score.id || index}
+                      key={player.id || index}
                       className={`border-b border-gray-700 hover:bg-dark-bg transition-colors ${
-                        score.userId === currentUserId ? 'ring-2 ring-cyan-400' : ''
+                        player.userId === currentUserId ? 'bg-cyan-900 bg-opacity-20 ring-2 ring-cyan-400' : ''
                       } ${
-                        index < 3 ? 'bg-opacity-20' : ''
+                        index < 3 ? 'bg-opacity-10' : ''
                       } ${
                         index === 0 ? 'bg-yellow-500' : 
                         index === 1 ? 'bg-gray-400' : 
                         index === 2 ? 'bg-orange-600' : ''
                       }`}
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
-                          {index === 0 && <span className="text-2xl">🥇</span>}
-                          {index === 1 && <span className="text-2xl">🥈</span>}
-                          {index === 2 && <span className="text-2xl">🥉</span>}
-                          <span className="font-bold text-white">#{index + 1}</span>
+                          {index === 0 && <span className="text-xl">🥇</span>}
+                          {index === 1 && <span className="text-xl">🥈</span>}
+                          {index === 2 && <span className="text-xl">🥉</span>}
+                          <span className="font-bold text-white text-base">#{index + 1}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-white font-bold">
-                        {score.playerName}
+                      <td className="px-3 py-3">
+                        <div className="text-white font-bold text-base">{player.playerName}</div>
+                        <div className="text-xs text-gray-400">{player.gamesPlayed} games</div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          score.role === 'hacker' 
-                            ? 'bg-cyber-red bg-opacity-20 text-cyber-red' 
-                            : 'bg-cyber-green bg-opacity-20 text-cyber-green'
-                        }`}>
-                          {score.role === 'hacker' ? '🎯 Hacker' : '🛡️ Defender'}
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            player.lastGame?.role === 'hacker' 
+                              ? 'bg-cyber-red bg-opacity-20 text-cyber-red' 
+                              : 'bg-cyber-green bg-opacity-20 text-cyber-green'
+                          }`}>
+                            {player.lastGame?.role === 'hacker' ? '🎯' : '🛡️'}
+                          </span>
+                          <span className={`text-xs ${
+                            player.lastGame?.won ? 'text-green-400' : 'text-red-400'
+                          }`}>
+                            {player.lastGame?.score}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3 text-right">
+                        <span className="text-xl font-bold text-cyber-blue">
+                          {player.bestScore}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded text-sm ${
-                          score.won 
-                            ? 'bg-green-900 bg-opacity-30 text-green-400' 
-                            : 'bg-red-900 bg-opacity-30 text-red-400'
-                        }`}>
-                          {score.won ? '✓ Won' : '✗ Lost'}
+                      <td className="px-3 py-3 text-right">
+                        <span className="text-lg font-bold text-cyber-purple">
+                          {player.totalScore}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className="text-2xl font-bold text-cyber-blue">
-                          {score.score}
-                        </span>
+                      <td className="px-3 py-3 text-center">
+                        <div className="text-sm font-medium text-white">
+                          {player.wins}/{player.gamesPlayed - player.wins}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {Math.round((player.wins / player.gamesPlayed) * 100)}%
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -183,24 +145,24 @@ export default function Leaderboard({ onBack, currentUserId }) {
         </div>
         
         {/* Stats */}
-        {filteredScores.length > 0 && (
+        {players.length > 0 && (
           <div className="grid md:grid-cols-3 gap-4 mb-6">
             <div className="bg-dark-card border border-gray-600 rounded-lg p-4 text-center">
-              <div className="text-sm text-gray-400 mb-1">Top Score</div>
+              <div className="text-sm text-gray-400 mb-1 font-medium">Top {sortBy === 'bestScore' ? 'Best' : 'Total'} Score</div>
               <div className="text-3xl font-bold text-cyber-blue">
-                {filteredScores[0]?.score || 0}
+                {players[0]?.[sortBy] || 0}
               </div>
             </div>
             <div className="bg-dark-card border border-gray-600 rounded-lg p-4 text-center">
-              <div className="text-sm text-gray-400 mb-1">Total Players</div>
+              <div className="text-sm text-gray-400 mb-1 font-medium">Total Players</div>
               <div className="text-3xl font-bold text-cyber-purple">
-                {filteredScores.length}
+                {players.length}
               </div>
             </div>
             <div className="bg-dark-card border border-gray-600 rounded-lg p-4 text-center">
-              <div className="text-sm text-gray-400 mb-1">Avg Score</div>
+              <div className="text-sm text-gray-400 mb-1 font-medium">Avg {sortBy === 'bestScore' ? 'Best' : 'Total'}</div>
               <div className="text-3xl font-bold text-cyber-green">
-                {Math.round(filteredScores.reduce((sum, s) => sum + s.score, 0) / filteredScores.length)}
+                {Math.round(players.reduce((sum, p) => sum + p[sortBy], 0) / players.length)}
               </div>
             </div>
           </div>
