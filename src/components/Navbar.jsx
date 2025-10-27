@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import UserProfile from './UserProfile';
 
-export default function Navbar({ isLoggedIn, playerName, userEmail, userId, onLogout, onViewProfile, currentScreen, onBack, onViewGuide }) {
+export default function Navbar({ isLoggedIn, playerName, userEmail, userId, onLogout, onViewProfile, currentScreen, onBack, onViewGuide, onViewLeaderboard }) {
   const [isVisible, setIsVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -63,6 +63,17 @@ export default function Navbar({ isLoggedIn, playerName, userEmail, userId, onLo
               >
                 <span>📖</span>
                 <span>Guide</span>
+              </button>
+            )}
+            
+            {/* Leaderboard Button */}
+            {currentScreen === 'home' && onViewLeaderboard && (
+              <button
+                onClick={onViewLeaderboard}
+                className="px-4 py-2 bg-cyber-blue/20 hover:bg-cyber-blue hover:text-white text-cyber-blue rounded-lg transition-all text-sm font-medium flex items-center gap-2 border border-cyber-blue/50 hover:border-cyber-blue transform hover:scale-105"
+              >
+                <span>🏆</span>
+                <span>Leaderboard</span>
               </button>
             )}
           </div>

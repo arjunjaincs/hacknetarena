@@ -1,14 +1,37 @@
 /**
- * HackNet Arena - Enhanced Game Engine v3.0
+ * HackNet Arena - Game Engine v4.0 (Optimized)
  * 
- * NEW FEATURES:
+ * FEATURES:
  * - Synergy/Combo system (chained actions give bonuses)
  * - Momentum tracking (consecutive wins = +5% each, max +25%)
  * - Counter system (category-based, -40% penalty)
- * - Energy & Cooldown management
+ * - Energy management with regeneration (+15 per round)
  * - Threat zones (Green/Yellow/Red)
  * - Strategic scoring (rewards combos, momentum, efficiency)
+ * 
+ * OPTIMIZATIONS:
+ * - Map-based combo lookups (O(1) performance)
+ * - Fixed energy regeneration
+ * - Fixed counter system for both roles
+ * - Improved input validation
+ * - Reduced memory allocation
  */
+
+import { HACKER_ACTIONS, DEFENDER_ACTIONS } from './gameActions.js';
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const ENERGY_REGEN_PER_ROUND = 15;
+const MAX_ENERGY = 100;
+const MIN_SUCCESS_CHANCE = 5;
+const MAX_SUCCESS_CHANCE = 95;
+const MOMENTUM_BONUS_PER_LEVEL = 5;
+const MAX_MOMENTUM = 5;
+const COUNTER_PENALTY = 40;
+const SYNERGY_SUCCESS_BONUS = 15;
+const RANDOM_VARIANCE = 10;
 
 // ============================================================================
 // INITIAL GAME STATE
@@ -17,17 +40,17 @@
 export const INITIAL_STATE = {
   // Round tracking
   round: 1,
-  maxRounds: 999, // Effectively infinite
+  maxRounds: 999,
   gameOver: false,
   winner: null,
-  lowThreatRounds: 0, // Track consecutive rounds with threat < 40
+  lowThreatRounds: 0,
   
   // Core metrics
   energyHacker: 100,
   energyDefender: 100,
   networkIntegrity: 100,
   dataStolen: 0,
-  threatLevel: 50, // Start at 50 for balanced gameplay
+  threatLevel: 50,
   
   // Player info
   playerRole: null,
@@ -42,8 +65,8 @@ export const INITIAL_STATE = {
   hackerStreak: 0,
   defenderStreak: 0,
   
-  // Combo tracking (for synergies)
-  lastHackerActions: [], // Last 2 actions
+  // Combo tracking
+  lastHackerActions: [],
   lastDefenderActions: [],
   
   // Cooldown tracking
@@ -53,60 +76,39 @@ export const INITIAL_STATE = {
   // Battle history
   history: [],
   
-  // Combo bonuses earned this game
+  // Stats
   combosEarned: 0,
   totalDamageDealt: 0,
   totalDamageBlocked: 0
 };
 
 // ============================================================================
-// SYNERGY/COMBO SYSTEM
+// SYNERGY/COMBO SYSTEM (Optimized with Map)
 // ============================================================================
 
+const COMBO_MAP = new Map([
+  // Hacker combos
+  ['phishing->socialeng', { bonus: 15, name: '🎣 Social Chain', description: 'Double manipulation!' }],
+  ['socialeng->phishing', { bonus: 15, name: '🎣 Social Chain', description: 'Double manipulation!' }],
+  ['ddos->bruteforce', { bonus: 18, name: '💥 Network Assault', description: 'Overwhelming attack!' }],
+  ['malware->zeroday', { bonus: 20, name: '⚡ Exploit Chain', description: 'Devastating combo!' }],
+  
+  // Defender combos
+  ['firewall->monitoring', { bonus: 15, name: '🛡️ Fortified Watch', description: 'Double protection!' }],
+  ['patch->backup', { bonus: 18, name: '🔧 Secure Foundation', description: 'Unbreakable defense!' }],
+  ['training->antivirus', { bonus: 15, name: '📚 Aware Defense', description: 'Smart protection!' }]
+]);
+
 /**
- * Check if actions create a synergy combo
- * Returns bonus threat/impact if combo detected
+ * Check if actions create a synergy combo (O(1) lookup)
  */
 function checkSynergy(currentAction, previousActions) {
-  if (previousActions.length === 0) return null;
+  if (!previousActions || previousActions.length === 0) return null;
   
   const lastAction = previousActions[previousActions.length - 1];
-  
-  // HACKER COMBOS (Simplified to 3 essential combos)
-  const hackerCombos = {
-    // Social Engineering chain
-    'phishing->socialeng': { bonus: 15, name: '🎣 Social Chain', description: 'Double manipulation!' },
-    'socialeng->phishing': { bonus: 15, name: '🎣 Social Chain', description: 'Double manipulation!' },
-    
-    // Network assault
-    'ddos->bruteforce': { bonus: 18, name: '💥 Network Assault', description: 'Overwhelming attack!' },
-    
-    // Software exploit chain
-    'malware->zeroday': { bonus: 20, name: '⚡ Exploit Chain', description: 'Devastating combo!' }
-  };
-  
-  // DEFENDER COMBOS (Simplified to 3 essential combos)
-  const defenderCombos = {
-    // Layered defense
-    'firewall->monitoring': { bonus: 15, name: '🛡️ Fortified Watch', description: 'Double protection!' },
-    
-    // Proactive defense
-    'patch->backup': { bonus: 18, name: '🔧 Secure Foundation', description: 'Unbreakable defense!' },
-    
-    // Complete protection
-    'training->antivirus': { bonus: 15, name: '📚 Aware Defense', description: 'Smart protection!' }
-  };
-  
   const comboKey = `${lastAction}->${currentAction}`;
-  const combos = currentAction.startsWith('firewall') || 
-                 currentAction.startsWith('training') || 
-                 currentAction.startsWith('antivirus') ||
-                 currentAction.startsWith('monitoring') ||
-                 currentAction.startsWith('patch') ||
-                 currentAction.startsWith('backup')
-                 ? defenderCombos : hackerCombos;
   
-  return combos[comboKey] || null;
+  return COMBO_MAP.get(comboKey) || null;
 }
 
 // ============================================================================
@@ -121,29 +123,29 @@ function calculateSuccess(action, gameState, isHacker, isCountered) {
   
   // Get momentum
   const momentum = isHacker ? gameState.hackerMomentum : gameState.defenderMomentum;
-  const momentumBonus = Math.min(momentum * 5, 25);
+  const momentumBonus = Math.min(momentum * MOMENTUM_BONUS_PER_LEVEL, MAX_MOMENTUM * MOMENTUM_BONUS_PER_LEVEL);
   chance += momentumBonus;
   
   // Apply counter penalty
+  const counterPenalty = isCountered ? COUNTER_PENALTY : 0;
   if (isCountered) {
-    chance -= 40;
+    chance -= COUNTER_PENALTY;
   }
   
   // Check for synergy bonus
   const previousActions = isHacker ? gameState.lastHackerActions : gameState.lastDefenderActions;
   const synergy = checkSynergy(action.id, previousActions);
-  let synergyBonus = 0;
+  const synergyBonus = synergy ? SYNERGY_SUCCESS_BONUS : 0;
   if (synergy) {
-    synergyBonus = 15; // +15% success for combos
-    chance += synergyBonus;
+    chance += SYNERGY_SUCCESS_BONUS;
   }
   
-  // Random variance (±5%)
-  const randomFactor = (Math.random() - 0.5) * 10;
+  // Random variance
+  const randomFactor = (Math.random() - 0.5) * RANDOM_VARIANCE;
   chance += randomFactor;
   
-  // Clamp between 5% and 95%
-  chance = Math.max(5, Math.min(95, chance));
+  // Clamp between min and max
+  chance = Math.max(MIN_SUCCESS_CHANCE, Math.min(MAX_SUCCESS_CHANCE, chance));
   
   // Roll for success
   const success = Math.random() * 100 < chance;
@@ -152,7 +154,7 @@ function calculateSuccess(action, gameState, isHacker, isCountered) {
     success,
     finalChance: Math.round(chance),
     momentumBonus,
-    counterPenalty: isCountered ? 40 : 0,
+    counterPenalty,
     synergyBonus,
     synergy,
     randomFactor: Math.round(randomFactor)
@@ -160,19 +162,24 @@ function calculateSuccess(action, gameState, isHacker, isCountered) {
 }
 
 // ============================================================================
-// CHECK COUNTERS
+// CHECK COUNTERS (Fixed for both roles)
 // ============================================================================
 
-function isActionCountered(action, lastOpponentAction) {
-  if (!lastOpponentAction) return false;
+function isActionCountered(action, lastOpponentActionId, allActions) {
+  if (!lastOpponentActionId) return false;
   
-  const counters = {
-    'firewall': 'Network',
-    'training': 'Human',
-    'antivirus': 'Software'
+  // Find the opponent's last action
+  const opponentAction = allActions?.find(a => a.id === lastOpponentActionId);
+  if (!opponentAction) return false;
+  
+  // Counter relationships: Network counters Software, Human counters Network, Software counters Human
+  const counterMap = {
+    'Network': 'Software',
+    'Human': 'Network',
+    'Software': 'Human'
   };
   
-  return counters[lastOpponentAction] === action.category;
+  return counterMap[opponentAction.category] === action.category;
 }
 
 // ============================================================================
@@ -197,24 +204,36 @@ export function processRound(state, playerAction, aiAction) {
     throw new Error('Invalid AI action: ' + JSON.stringify(aiAction));
   }
   
-  const newState = JSON.parse(JSON.stringify(state)); // Deep clone
+  // Shallow clone for performance (deep clone only nested objects that change)
+  const newState = {
+    ...state,
+    hackerCooldowns: { ...state.hackerCooldowns },
+    defenderCooldowns: { ...state.defenderCooldowns },
+    lastHackerActions: [...state.lastHackerActions],
+    lastDefenderActions: [...state.lastDefenderActions],
+    history: [...state.history]
+  };
   
   // Determine roles
   const hackerAction = state.playerRole === 'hacker' ? playerAction : aiAction;
   const defenderAction = state.playerRole === 'defender' ? playerAction : aiAction;
+  
+  // All actions for counter checking
+  const allActions = [...HACKER_ACTIONS, ...DEFENDER_ACTIONS];
   
   // Check energy
   const hackerHasEnergy = newState.energyHacker >= hackerAction.energyCost;
   const defenderHasEnergy = newState.energyDefender >= defenderAction.energyCost;
   
   // Check cooldowns
-  const hackerOnCooldown = newState.hackerCooldowns[hackerAction.id] > 0;
-  const defenderOnCooldown = newState.defenderCooldowns[defenderAction.id] > 0;
+  const hackerOnCooldown = (newState.hackerCooldowns[hackerAction.id] || 0) > 0;
+  const defenderOnCooldown = (newState.defenderCooldowns[defenderAction.id] || 0) > 0;
   
-  // Check if countered
+  // Check if countered (FIXED: now properly checks opponent's action)
   const hackerCountered = isActionCountered(
-    hackerAction, 
-    newState.lastDefenderActions[newState.lastDefenderActions.length - 1]
+    hackerAction,
+    newState.lastDefenderActions[newState.lastDefenderActions.length - 1],
+    allActions
   );
   
   // Calculate success
@@ -288,6 +307,10 @@ export function processRound(state, playerAction, aiAction) {
   // Deduct energy
   if (hackerHasEnergy) newState.energyHacker -= hackerAction.energyCost;
   if (defenderHasEnergy) newState.energyDefender -= defenderAction.energyCost;
+  
+  // FIXED: Regenerate energy (+15 per round)
+  newState.energyHacker = Math.min(MAX_ENERGY, newState.energyHacker + ENERGY_REGEN_PER_ROUND);
+  newState.energyDefender = Math.min(MAX_ENERGY, newState.energyDefender + ENERGY_REGEN_PER_ROUND);
   
   // Set cooldowns
   if (hackerResult.success && hackerAction.cooldown > 0) {
@@ -403,8 +426,8 @@ function calculateFinalScores(state) {
     state.totalDamageBlocked * 0.3 +
     (100 - state.energyDefender) * 0.1;
   
-  state.playerScore = state.playerRole === 'hacker' ? hackerScore : defenderScore;
-  state.aiScore = state.playerRole === 'hacker' ? defenderScore : hackerScore;
+  state.playerScore = state.playerRole === 'hacker' ? Math.round(hackerScore) : Math.round(defenderScore);
+  state.aiScore = state.playerRole === 'hacker' ? Math.round(defenderScore) : Math.round(hackerScore);
 }
 
-export { calculateSuccess, checkSynergy };
+export { calculateSuccess, checkSynergy, isActionCountered };

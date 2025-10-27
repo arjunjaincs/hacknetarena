@@ -1,24 +1,85 @@
 /**
- * Simple Web Audio API sound effects
- * No external files needed - all sounds generated programmatically
+ * HackNet Arena - Sound Effects v4.0 (Optimized)
+ * 
+ * OPTIMIZATIONS:
+ * - Singleton AudioContext pattern (prevents memory leaks)
+ * - Configurable volume controls
+ * - Mute/unmute support
+ * - Reduced code duplication
+ * - Better error handling
+ * 
+ * All sounds generated programmatically - no external files needed
  */
 
-// Audio context (created lazily to avoid autoplay issues)
-let audioContext = null;
+// ============================================================================
+// AUDIO MANAGER (Singleton Pattern)
+// ============================================================================
+
+class AudioManager {
+  constructor() {
+    this.context = null;
+    this.masterVolume = 0.3;
+    this.isMuted = false;
+    this.isEnabled = true;
+  }
+
+  getContext() {
+    if (!this.context && this.isEnabled) {
+      try {
+        this.context = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {
+        console.warn('Web Audio API not supported');
+        this.isEnabled = false;
+      }
+    }
+    return this.context;
+  }
+
+  setVolume(volume) {
+    this.masterVolume = Math.max(0, Math.min(1, volume));
+  }
+
+  mute() {
+    this.isMuted = true;
+  }
+
+  unmute() {
+    this.isMuted = false;
+  }
+
+  toggleMute() {
+    this.isMuted = !this.isMuted;
+    return this.isMuted;
+  }
+
+  resume() {
+    const ctx = this.getContext();
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume();
+    }
+  }
+}
+
+const audioManager = new AudioManager();
 
 function getAudioContext() {
-  if (!audioContext) {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  return audioContext;
+  return audioManager.getContext();
 }
+
+// ============================================================================
+// SOUND EFFECTS
+// ============================================================================
 
 /**
  * Play a click sound
  */
 export function playClickSound() {
+  if (audioManager.isMuted || !audioManager.isEnabled) return;
+  
   try {
     const ctx = getAudioContext();
+    if (!ctx) return;
+    
     const oscillator = ctx.createOscillator();
     const gainNode = ctx.createGain();
     
@@ -28,14 +89,14 @@ export function playClickSound() {
     oscillator.frequency.value = 800;
     oscillator.type = 'sine';
     
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    const volume = 0.3 * audioManager.masterVolume;
+    gainNode.gain.setValueAtTime(volume, ctx.currentTime);
     gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
     
     oscillator.start(ctx.currentTime);
     oscillator.stop(ctx.currentTime + 0.1);
   } catch (e) {
-    // Silently fail if audio not supported
-    console.log('Audio not supported');
+    console.warn('Error playing click sound:', e.message);
   }
 }
 
@@ -323,17 +384,55 @@ export function playEnergyLowSound() {
   }
 }
 
+// ============================================================================
+// AUDIO CONTROL FUNCTIONS
+// ============================================================================
+
 /**
  * Initialize audio context on user interaction
- * Call this on first user click to enable sounds
  */
 export function initAudio() {
-  try {
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') {
-      ctx.resume();
-    }
-  } catch (e) {
-    console.log('Audio not supported');
-  }
+  audioManager.resume();
+}
+
+/**
+ * Set master volume (0-1)
+ */
+export function setVolume(volume) {
+  audioManager.setVolume(volume);
+}
+
+/**
+ * Mute all sounds
+ */
+export function mute() {
+  audioManager.mute();
+}
+
+/**
+ * Unmute all sounds
+ */
+export function unmute() {
+  audioManager.unmute();
+}
+
+/**
+ * Toggle mute state
+ */
+export function toggleMute() {
+  return audioManager.toggleMute();
+}
+
+/**
+ * Check if audio is muted
+ */
+export function isMuted() {
+  return audioManager.isMuted;
+}
+
+/**
+ * Get current volume
+ */
+export function getVolume() {
+  return audioManager.masterVolume;
 }

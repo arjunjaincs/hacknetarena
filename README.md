@@ -6,6 +6,8 @@
 [![Powered by Firebase](https://img.shields.io/badge/Firebase-Realtime-orange.svg)](https://firebase.google.com/)
 [![Styled with Tailwind](https://img.shields.io/badge/Tailwind-CSS-38bdf8.svg)](https://tailwindcss.com/)
 
+🎮 **[Play Now](https://hacknetarena.vercel.app/)** | 📖 **[Full Documentation](docs/FINAL_PROJECT_DOCUMENTATION.md)** | 🎯 **[Game Guide](docs/GAME_GUIDE.md)**
+
 ---
 
 ## 🌟 **Features**
@@ -211,6 +213,20 @@ VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 ```
+
+### **Firebase Database Rules:**
+
+**IMPORTANT:** Apply these rules to fix the leaderboard indexing error:
+
+```bash
+# Deploy database rules
+firebase deploy --only database
+```
+
+The `database.rules.json` file includes required indexes for:
+- Leaderboard sorting by score, timestamp, and role
+- Game history sorting by timestamp
+- Proper read/write permissions
 
 ---
 

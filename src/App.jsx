@@ -150,6 +150,7 @@ function App() {
         onLogout={handleLogout}
         onViewProfile={handleViewProfile}
         onViewGuide={handleViewGuide}
+        onViewLeaderboard={handleViewLeaderboard}
         currentScreen={currentScreen}
         onBack={currentScreen === 'game' ? handleBackToHome : handleBackToHome}
       />
