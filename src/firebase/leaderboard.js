@@ -16,8 +16,13 @@ import { ref, push, set, get, query, orderByChild, limitToLast } from 'firebase/
  * @returns {Promise<boolean>} Success status
  */
 export async function submitScore(playerName, score, role, won, userId = null) {
-  if (!isFirebaseEnabled || !userId) {
-    console.warn('Firebase not enabled or no userId - score not saved');
+  if (!isFirebaseEnabled) {
+    console.log('Firebase not enabled - playing in offline mode');
+    return false;
+  }
+  
+  if (!userId) {
+    console.log('Guest mode - score not saved to leaderboard');
     return false;
   }
   

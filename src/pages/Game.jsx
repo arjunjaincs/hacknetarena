@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { INITIAL_STATE, processRound } from '../game/gameEngine';
-import { getActionsForRole, isActionAvailable, getSynergyDescription } from '../game/gameActions';
+import { getGameActions, getSynergyDescription, getAvailableActions } from '../game/gameActionsExpanded';
 import { chooseAIAction } from '../game/gameAI';
 import { playClickSound, playSuccessSound, playFailSound, playComboSound, playCounterSound, playThreatCriticalSound, playEnergyLowSound, initAudio } from '../game/soundEffects';
 import ActionCard from '../components/ActionCard';
@@ -10,11 +10,15 @@ import MiniReward from '../components/MiniReward';
 import QuickStats from '../components/QuickStats';
 
 export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit }) {
+  // Generate random action set for this game
+  const [gameActions] = useState(() => getGameActions());
+  
   const [gameState, setGameState] = useState({
     ...INITIAL_STATE,
     playerRole,
     playerName,
-    userId
+    userId,
+    gameActions // Store in state for AI and engine
   });
   
   const [selectedAction, setSelectedAction] = useState(null);
@@ -30,7 +34,7 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
   const playerCooldowns = playerRole === 'hacker' ? gameState.hackerCooldowns : gameState.defenderCooldowns;
   const playerMomentum = playerRole === 'hacker' ? gameState.hackerMomentum : gameState.defenderMomentum;
   const playerLastActions = playerRole === 'hacker' ? gameState.lastHackerActions : gameState.lastDefenderActions;
-  const playerActions = getActionsForRole(playerRole);
+  const playerActions = playerRole === 'hacker' ? gameActions.hackerActions : gameActions.defenderActions;
   
   // Check for potential synergy
   const potentialSynergy = selectedAction && playerLastActions.length > 0
@@ -40,7 +44,11 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
   // Handle action selection
   const handleActionSelect = (action) => {
     if (isThinking || showResult) return;
-    if (!isActionAvailable(action, playerEnergy, playerCooldowns)) return;
+    
+    // Check if action is available
+    const onCooldown = (playerCooldowns[action.id] || 0) > 0;
+    const hasEnergy = playerEnergy >= action.energyCost;
+    if (onCooldown || !hasEnergy) return;
     
     playClickSound();
     setSelectedAction(action);
@@ -49,15 +57,15 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
   // Handle double-click (auto-submit)
   const handleActionDoubleClick = (action) => {
     if (isThinking || showResult) return;
-    if (!isActionAvailable(action, playerEnergy, playerCooldowns)) return;
+    
+    // Check if action is available
+    const onCooldown = (playerCooldowns[action.id] || 0) > 0;
+    const hasEnergy = playerEnergy >= action.energyCost;
+    if (onCooldown || !hasEnergy) return;
     
     playClickSound();
     setSelectedAction(action);
-    
-    // Auto-submit immediately with the action
-    setTimeout(() => {
-      handleConfirm(action);
-    }, 100);
+    setTimeout(() => handleConfirm(action), 100);
   };
   
   // Handle action confirmation
@@ -253,9 +261,9 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
           {potentialSynergy && !isThinking && !showResult && (
             <div className="mb-4 p-3 bg-purple-900 bg-opacity-30 border border-purple-500 rounded-lg text-center animate-pulse">
               <div className="text-purple-400 font-bold">
-                ⚡ COMBO AVAILABLE: {potentialSynergy}
+                ⚡ COMBO AVAILABLE: {potentialSynergy.name}
               </div>
-              <div className="text-xs text-purple-300">+15% success chance & bonus damage!</div>
+              <div className="text-xs text-purple-300">+15% success chance & +{potentialSynergy.bonus} bonus damage!</div>
             </div>
           )}
           
@@ -263,7 +271,11 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
           <div className="flex justify-center mb-4 md:mb-6">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 max-w-5xl">
               {playerActions.map((action) => {
-                const available = isActionAvailable(action, playerEnergy, playerCooldowns);
+                // Check if action is available
+                const onCooldown = (playerCooldowns[action.id] || 0) > 0;
+                const hasEnergy = playerEnergy >= action.energyCost;
+                const available = !onCooldown && hasEnergy;
+                
                 const cooldown = playerCooldowns[action.id] || 0;
                 const hasSynergy = playerLastActions.length > 0 && 
                   getSynergyDescription(action.id, playerLastActions[playerLastActions.length - 1]);
@@ -279,7 +291,7 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
                     cooldown={cooldown}
                     energy={playerEnergy}
                     hasSynergy={!!hasSynergy}
-                    synergyName={hasSynergy}
+                    synergyName={hasSynergy ? hasSynergy.name : null}
                   />
                 );
               })}

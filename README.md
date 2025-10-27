@@ -260,13 +260,52 @@ firebase deploy
 
 ## 🎓 **Educational Value**
 
-Learn real cybersecurity concepts:
-- **DDoS Attacks** - Distributed Denial of Service
-- **Phishing** - Social engineering tactics
-- **Zero-Day Exploits** - Unknown vulnerabilities
-- **Firewalls** - Network protection
-- **Patch Management** - Fixing vulnerabilities
-- **Backup Strategies** - Data recovery
+Learn real cybersecurity concepts through 24 unique actions:
+
+### **Hacker Actions (12):**
+**Network Attacks:**
+- **DDoS Attack** - Flood servers with traffic
+- **Brute Force** - Crack passwords rapidly
+- **Port Scanning** - Find open network ports
+- **Man-in-the-Middle** - Intercept communications
+
+**Human Exploitation:**
+- **Phishing** - Trick users via fake emails
+- **Social Engineering** - Manipulate employees
+- **Pretexting** - Create false scenarios
+- **Tailgating** - Follow authorized personnel
+
+**Software Attacks:**
+- **Deploy Malware** - Install malicious code
+- **Zero-Day Exploit** - Exploit unknown vulnerabilities
+- **Ransomware** - Encrypt and demand payment
+- **SQL Injection** - Manipulate database queries
+
+### **Defender Actions (12):**
+**Network Defense:**
+- **Deploy Firewall** - Block malicious traffic
+- **Intrusion Detection** - Monitor suspicious activity
+- **VPN Encryption** - Encrypt all communications
+- **Network Segmentation** - Isolate network sections
+
+**Human Security:**
+- **Security Training** - Educate staff on threats
+- **Security Awareness** - Promote vigilance culture
+- **Multi-Factor Auth** - Require multiple verifications
+- **Access Control** - Restrict user permissions
+
+**Software Protection:**
+- **Antivirus Scan** - Detect and remove malware
+- **Patch Systems** - Fix known vulnerabilities
+- **Backup Data** - Create recovery points
+- **Data Encryption** - Encrypt sensitive data
+
+### **Rotation System:**
+Each game randomly selects 6 actions per role (2 from each category) ensuring:
+- ✅ Unique gameplay every time
+- ✅ Balanced category distribution
+- ✅ High replayability
+- ✅ Learn more tactics over time
 
 ---
 
@@ -288,11 +327,13 @@ MIT License - feel free to use for learning and projects!
 
 ## 🎮 **Game Stats**
 
-- **12 Actions** (6 Hacker, 6 Defender)
-- **6 Combos** (3 per role)
+- **24 Total Actions** (12 Hacker, 12 Defender)
+- **6 Actions Per Game** (randomly selected for variety)
+- **12 Unique Combos** (6 per role)
 - **4 Win Conditions**
-- **Infinite Rounds**
+- **Infinite Rounds** (until win condition)
 - **~50/50 Win Rate** (balanced AI)
+- **Rotation System** (unique actions every game)
 
 ---
 

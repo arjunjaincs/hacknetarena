@@ -89,14 +89,121 @@ export default function Guide({ onBack }) {
           </div>
         </div>
 
+        {/* Rotation System */}
+        <div className="bg-gradient-to-br from-cyber-blue/10 to-dark-card border-2 border-cyber-blue rounded-lg p-6 mb-6">
+          <h2 className="text-2xl font-bold text-cyber-blue mb-4">🔄 Rotation System</h2>
+          <div className="space-y-3 text-gray-300 text-sm">
+            <p>
+              <strong className="text-cyber-blue">24 Total Actions:</strong> 12 Hacker attacks + 12 Defender protections
+            </p>
+            <p>
+              <strong className="text-cyber-blue">6 Per Game:</strong> Each game randomly selects 6 actions per role (2 Network, 2 Human, 2 Software)
+            </p>
+            <p>
+              <strong className="text-cyber-blue">Unique Every Time:</strong> Every game feels different with new action combinations!
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              This ensures balanced gameplay while keeping things fresh. You'll learn all 24 actions over multiple games!
+            </p>
+          </div>
+        </div>
+
         {/* Action Categories */}
         <div className="bg-dark-card border-2 border-gray-600 rounded-lg p-6 mb-6">
-          <h2 className="text-2xl font-bold text-white mb-4">🎴 Action Categories</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">🎴 All Actions (24 Total)</h2>
+          
+          <div className="space-y-6">
+            {/* Hacker Actions */}
+            <div>
+              <h3 className="text-xl font-bold text-red-400 mb-3">🎯 Hacker Actions (12)</h3>
+              
+              <div className="space-y-3">
+                <div className="bg-red-900/10 border border-red-500/30 rounded p-3">
+                  <h4 className="text-red-400 font-bold mb-2 text-sm">Network Attacks (4):</h4>
+                  <ul className="text-xs text-gray-400 space-y-1 ml-4">
+                    <li>• <strong>DDoS Attack</strong> - Flood servers with traffic</li>
+                    <li>• <strong>Brute Force</strong> - Crack passwords rapidly</li>
+                    <li>• <strong>Port Scanning</strong> - Find open network ports</li>
+                    <li>• <strong>Man-in-the-Middle</strong> - Intercept communications</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-yellow-900/10 border border-yellow-500/30 rounded p-3">
+                  <h4 className="text-yellow-400 font-bold mb-2 text-sm">Human Exploitation (4):</h4>
+                  <ul className="text-xs text-gray-400 space-y-1 ml-4">
+                    <li>• <strong>Phishing</strong> - Trick users via fake emails</li>
+                    <li>• <strong>Social Engineering</strong> - Manipulate employees</li>
+                    <li>• <strong>Pretexting</strong> - Create false scenarios</li>
+                    <li>• <strong>Tailgating</strong> - Follow authorized personnel</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-purple-900/10 border border-purple-500/30 rounded p-3">
+                  <h4 className="text-purple-400 font-bold mb-2 text-sm">Software Attacks (4):</h4>
+                  <ul className="text-xs text-gray-400 space-y-1 ml-4">
+                    <li>• <strong>Deploy Malware</strong> - Install malicious code</li>
+                    <li>• <strong>Zero-Day Exploit</strong> - Exploit unknown vulnerabilities</li>
+                    <li>• <strong>Ransomware</strong> - Encrypt and demand payment</li>
+                    <li>• <strong>SQL Injection</strong> - Manipulate database queries</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            {/* Defender Actions */}
+            <div>
+              <h3 className="text-xl font-bold text-green-400 mb-3">🛡️ Defender Actions (12)</h3>
+              
+              <div className="space-y-3">
+                <div className="bg-red-900/10 border border-red-500/30 rounded p-3">
+                  <h4 className="text-red-400 font-bold mb-2 text-sm">Network Defense (4):</h4>
+                  <ul className="text-xs text-gray-400 space-y-1 ml-4">
+                    <li>• <strong>Deploy Firewall</strong> - Block malicious traffic</li>
+                    <li>• <strong>Intrusion Detection</strong> - Monitor suspicious activity</li>
+                    <li>• <strong>VPN Encryption</strong> - Encrypt all communications</li>
+                    <li>• <strong>Network Segmentation</strong> - Isolate network sections</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-yellow-900/10 border border-yellow-500/30 rounded p-3">
+                  <h4 className="text-yellow-400 font-bold mb-2 text-sm">Human Security (4):</h4>
+                  <ul className="text-xs text-gray-400 space-y-1 ml-4">
+                    <li>• <strong>Security Training</strong> - Educate staff on threats</li>
+                    <li>• <strong>Security Awareness</strong> - Promote vigilance culture</li>
+                    <li>• <strong>Multi-Factor Auth</strong> - Require multiple verifications</li>
+                    <li>• <strong>Access Control</strong> - Restrict user permissions</li>
+                  </ul>
+                </div>
+                
+                <div className="bg-purple-900/10 border border-purple-500/30 rounded p-3">
+                  <h4 className="text-purple-400 font-bold mb-2 text-sm">Software Protection (4):</h4>
+                  <ul className="text-xs text-gray-400 space-y-1 ml-4">
+                    <li>• <strong>Antivirus Scan</strong> - Detect and remove malware</li>
+                    <li>• <strong>Patch Systems</strong> - Fix known vulnerabilities</li>
+                    <li>• <strong>Backup Data</strong> - Create recovery points</li>
+                    <li>• <strong>Data Encryption</strong> - Encrypt sensitive data</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-cyber-blue/10 border border-cyber-blue/30 rounded">
+            <p className="text-xs text-gray-400">
+              <strong className="text-cyber-blue">Note:</strong> Each game shows 6 random actions per role (2 from each category). 
+              Play multiple games to experience all 24 actions!
+            </p>
+          </div>
+        </div>
+
+        {/* Legacy Categories Section */}
+        <div className="bg-dark-card border-2 border-gray-600 rounded-lg p-6 mb-6">
+          <h2 className="text-2xl font-bold text-white mb-4">🎴 Category System</h2>
           
           <div className="grid md:grid-cols-3 gap-4">
             <div className="bg-red-900/20 border border-red-500/50 rounded p-4">
               <h3 className="text-red-400 font-bold mb-2">🔴 Network</h3>
-              <p className="text-xs text-gray-400">DDoS, Brute Force, Firewall, Monitoring</p>
+              <p className="text-xs text-gray-400">Infrastructure attacks & defenses</p>
             </div>
             
             <div className="bg-blue-900/20 border border-blue-500/50 rounded p-4">

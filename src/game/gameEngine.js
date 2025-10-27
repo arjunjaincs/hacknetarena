@@ -18,6 +18,7 @@
  */
 
 import { HACKER_ACTIONS, DEFENDER_ACTIONS } from './gameActions.js';
+import { getActionById } from './gameActionsExpanded.js';
 
 // ============================================================================
 // CONSTANTS
@@ -219,7 +220,9 @@ export function processRound(state, playerAction, aiAction) {
   const defenderAction = state.playerRole === 'defender' ? playerAction : aiAction;
   
   // All actions for counter checking
-  const allActions = [...HACKER_ACTIONS, ...DEFENDER_ACTIONS];
+  const allActions = state.gameActions 
+    ? [...state.gameActions.hackerActions, ...state.gameActions.defenderActions]
+    : [...HACKER_ACTIONS, ...DEFENDER_ACTIONS];
   
   // Validate energy state
   if (newState.energyHacker < 0 || newState.energyDefender < 0) {

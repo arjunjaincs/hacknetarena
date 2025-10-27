@@ -22,7 +22,7 @@
  * 4. 85% pick best, 15% random (mistakes)
  */
 
-import { getAvailableActions, getSynergyDescription, getActionById } from './gameActions.js';
+import { getAvailableActions, getSynergyDescription, getActionById } from './gameActionsExpanded.js';
 import { calculateSuccess } from './gameEngine.js';
 
 // ============================================================================
@@ -73,12 +73,12 @@ export function chooseAIAction(gameState) {
   const aiLastActions = aiRole === 'hacker' ? gameState.lastHackerActions : gameState.lastDefenderActions;
   
   // Get available actions (not on cooldown, enough energy)
-  const availableActions = getAvailableActions(aiRole, aiEnergy, aiCooldowns);
+  const availableActions = getAvailableActions(aiRole, aiEnergy, aiCooldowns, gameState.gameActions);
   
   // Fallback: if no actions available, get all actions and pick cheapest
   if (availableActions.length === 0) {
     console.warn('AI has no available actions, picking cheapest');
-    const allActions = getAvailableActions(aiRole, 100, {});
+    const allActions = getAvailableActions(aiRole, 100, {}, gameState.gameActions);
     if (allActions.length === 0) {
       console.error('No actions available for AI role:', aiRole);
       return null;
