@@ -36,12 +36,12 @@ export default function Navbar({ isLoggedIn, playerName, userEmail, userId, onLo
         ? 'bg-dark-card/95 backdrop-blur-md border-b border-gray-700 shadow-lg shadow-cyber-blue/20' 
         : 'bg-dark-card/70 backdrop-blur-sm border-b border-gray-700/50'
     }`}>
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16">
+      <div className="w-full px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16 max-w-7xl mx-auto">
           {/* Left Side - Logo & Navigation */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
             {/* Logo */}
-            <div className="text-sm sm:text-lg md:text-xl font-bold bg-gradient-to-r from-cyber-blue to-cyber-purple bg-clip-text text-transparent whitespace-nowrap">
+            <div className="text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-cyber-blue to-cyber-purple bg-clip-text text-transparent whitespace-nowrap">
               HACKNET
             </div>
             

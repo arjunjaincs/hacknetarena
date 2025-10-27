@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { INITIAL_STATE, processRound } from '../game/gameEngine';
-import { getGameActions, getSynergyDescription, getAvailableActions } from '../game/gameActionsExpanded';
+import { getGameActions, getSynergyDescription, getAvailableActions } from '../game/gameActions';
 import { chooseAIAction } from '../game/gameAI';
 import { playClickSound, playSuccessSound, playFailSound, playComboSound, playCounterSound, playThreatCriticalSound, playEnergyLowSound, initAudio } from '../game/soundEffects';
 import ActionCard from '../components/ActionCard';

@@ -22,7 +22,7 @@
  * 4. 85% pick best, 15% random (mistakes)
  */
 
-import { getAvailableActions, getSynergyDescription, getActionById } from './gameActionsExpanded.js';
+import { getAvailableActions, getSynergyDescription, getActionById } from './gameActions.js';
 import { calculateSuccess } from './gameEngine.js';
 
 // ============================================================================

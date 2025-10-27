@@ -17,8 +17,7 @@
  * - Reduced memory allocation
  */
 
-import { HACKER_ACTIONS, DEFENDER_ACTIONS } from './gameActions.js';
-import { getActionById } from './gameActionsExpanded.js';
+import { HACKER_ACTIONS, DEFENDER_ACTIONS, getActionById } from './gameActions.js';
 
 // ============================================================================
 // CONSTANTS
