@@ -5,12 +5,22 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { playClickSound, initAudio } from '../game/soundEffects';
+import { DIFFICULTY_SETTINGS } from '../game/gameAI';
+import { getDailyChallenge, getTimeUntilNextChallenge, formatTimeRemaining } from '../game/dailyChallenges';
+import { getTodaysChallengeCount, hasCompletedTodaysChallenge } from '../firebase/dailyChallenges';
 
-export default function Home({ onStartGame, isLoggedIn = false, playerName: loggedInName = '' }) {
+export default function Home({ onStartGame, onStartDailyChallenge, userId, isLoggedIn = false, playerName: loggedInName = '' }) {
   const [selectedRole, setSelectedRole] = useState(null);
   const [playerName, setPlayerName] = useState('');
   const [showNameModal, setShowNameModal] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [difficulty, setDifficulty] = useState(() => {
+    return localStorage.getItem('hacknet_difficulty') || 'normal';
+  });
+  const [dailyChallenge, setDailyChallenge] = useState(null);
+  const [challengeCount, setChallengeCount] = useState(0);
+  const [hasCompleted, setHasCompleted] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState('');
   const inputRef = useRef(null);
   
   // Fade in animation
@@ -18,16 +28,42 @@ export default function Home({ onStartGame, isLoggedIn = false, playerName: logg
     setIsVisible(true);
   }, []);
   
+  // Load daily challenge
+  useEffect(() => {
+    const challenge = getDailyChallenge();
+    setDailyChallenge(challenge);
+    
+    getTodaysChallengeCount().then(setChallengeCount);
+    
+    if (userId) {
+      hasCompletedTodaysChallenge(userId).then(setHasCompleted);
+    }
+    
+    // Update countdown timer
+    const timer = setInterval(() => {
+      const ms = getTimeUntilNextChallenge();
+      setTimeRemaining(formatTimeRemaining(ms));
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [userId]);
+  
   const handleRoleSelect = (role) => {
     initAudio();
     playClickSound();
     setSelectedRole(role);
     
     if (isLoggedIn) {
-      onStartGame(role, loggedInName);
+      onStartGame(role, loggedInName, difficulty);
     } else {
       setShowNameModal(true);
     }
+  };
+  
+  const handleDifficultyChange = (newDifficulty) => {
+    playClickSound();
+    setDifficulty(newDifficulty);
+    localStorage.setItem('hacknet_difficulty', newDifficulty);
   };
   
   useEffect(() => {
@@ -40,7 +76,7 @@ export default function Home({ onStartGame, isLoggedIn = false, playerName: logg
     const sanitizedName = playerName.trim().slice(0, 20).replace(/[^A-Za-z0-9 _-]/g, '').replace(/\s+/g, ' ');
     if (selectedRole && sanitizedName) {
       playClickSound();
-      onStartGame(selectedRole, sanitizedName);
+      onStartGame(selectedRole, sanitizedName, difficulty);
     }
   };
   
@@ -156,21 +192,97 @@ export default function Home({ onStartGame, isLoggedIn = false, playerName: logg
           </div>
         </div>
         
+        {/* Difficulty Selector */}
+        <div className="mt-8 bg-dark-card backdrop-blur-sm border-2 border-gray-700 rounded-xl p-6">
+          <h3 className="text-xl font-bold text-center text-cyber-blue mb-4">⚙️ Select Difficulty</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Object.entries(DIFFICULTY_SETTINGS).map(([key, config]) => (
+              <button
+                key={key}
+                onClick={() => handleDifficultyChange(key)}
+                className={`p-4 rounded-lg border-2 transition-all duration-300 text-left ${
+                  difficulty === key
+                    ? 'border-cyber-blue bg-cyber-blue/20 scale-105'
+                    : 'border-gray-600 hover:border-gray-500'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-lg font-bold text-white">{config.name}</span>
+                  {difficulty === key && <span className="text-cyber-blue">✓</span>}
+                </div>
+                <div className="text-sm text-gray-300 space-y-1">
+                  <div>• AI Mistakes: {Math.round(config.mistakeProbability * 100)}%</div>
+                  <div>• Score: ×{config.scoreMultiplier}</div>
+                  {config.playerEnergyBonus > 0 && (
+                    <div className="text-green-400">• +{config.playerEnergyBonus} Starting Energy</div>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        {/* Daily Challenge */}
+        {dailyChallenge && (
+          <div className="mt-8 bg-gradient-to-r from-yellow-900/80 to-orange-900/80 backdrop-blur-sm border-2 border-yellow-500 rounded-xl p-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/20 rounded-full blur-3xl"></div>
+            
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <h2 className="text-2xl font-bold text-yellow-400 flex items-center gap-2">
+                  {dailyChallenge.icon} Daily Challenge
+                </h2>
+                <div className="text-sm text-yellow-300 font-mono">
+                  ⏰ Next in: {timeRemaining}
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <h3 className="text-xl font-bold text-white mb-2">{dailyChallenge.name}</h3>
+                <p className="text-gray-300 mb-3">{dailyChallenge.description}</p>
+                <div className="flex items-center gap-4 text-sm flex-wrap">
+                  <span className="px-3 py-1 rounded bg-yellow-900/50 text-yellow-400 border border-yellow-500">
+                    {dailyChallenge.role === 'hacker' ? '🎯 Hacker' : '🛡️ Defender'}
+                  </span>
+                  <span className="px-3 py-1 rounded bg-orange-900/50 text-orange-400 border border-orange-500">
+                    ×{dailyChallenge.scoreMultiplier} Score
+                  </span>
+                  <span className="text-gray-400">
+                    👥 {challengeCount.toLocaleString()} completed today
+                  </span>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => onStartDailyChallenge && onStartDailyChallenge(dailyChallenge)}
+                disabled={hasCompleted}
+                className={`w-full px-6 py-4 rounded-lg font-bold text-lg transition-all duration-300 ${
+                  hasCompleted
+                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-yellow-500 to-orange-500 text-black hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/50'
+                }`}
+              >
+                {hasCompleted ? '✓ Completed Today' : '🎯 Start Daily Challenge'}
+              </button>
+            </div>
+          </div>
+        )}
+        
         {/* Features */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div className="bg-dark-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 hover:border-cyber-blue transition-colors">
+        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="bg-dark-card backdrop-blur-sm border-2 border-gray-700 rounded-xl p-4 hover:border-cyber-blue transition-colors">
             <div className="text-2xl mb-2">⚡</div>
             <div className="text-xs text-gray-400">FAST-PACED</div>
           </div>
-          <div className="bg-dark-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 hover:border-cyber-purple transition-colors">
+          <div className="bg-dark-card backdrop-blur-sm border-2 border-gray-700 rounded-xl p-4 hover:border-cyber-purple transition-colors">
             <div className="text-2xl mb-2">🧠</div>
             <div className="text-xs text-gray-400">STRATEGIC</div>
           </div>
-          <div className="bg-dark-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 hover:border-cyber-green transition-colors">
+          <div className="bg-dark-card backdrop-blur-sm border-2 border-gray-700 rounded-xl p-4 hover:border-cyber-green transition-colors">
             <div className="text-2xl mb-2">🎓</div>
             <div className="text-xs text-gray-400">EDUCATIONAL</div>
           </div>
-          <div className="bg-dark-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 hover:border-red-500 transition-colors">
+          <div className="bg-dark-card backdrop-blur-sm border-2 border-gray-700 rounded-xl p-4 hover:border-red-500 transition-colors">
             <div className="text-2xl mb-2">🏆</div>
             <div className="text-xs text-gray-400">COMPETITIVE</div>
           </div>

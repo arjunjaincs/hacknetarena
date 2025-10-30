@@ -39,6 +39,51 @@
           },
           "timestamp": {
             ".validate": "newData.isNumber()"
+          },
+          "difficulty": {
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'easy' || newData.val() === 'normal' || newData.val() === 'hard'))"
+          }
+        }
+      }
+    },
+    "gameHistory": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        "$gameId": {
+          ".validate": "newData.hasChildren(['score', 'role', 'won', 'timestamp'])",
+          "score": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "role": {
+            ".validate": "newData.isString() && (newData.val() === 'hacker' || newData.val() === 'defender')"
+          },
+          "won": {
+            ".validate": "newData.isBoolean()"
+          },
+          "timestamp": {
+            ".validate": "newData.isNumber()"
+          },
+          "difficulty": {
+            ".validate": "!newData.exists() || (newData.isString() && (newData.val() === 'easy' || newData.val() === 'normal' || newData.val() === 'hard'))"
+          }
+        }
+      }
+    },
+    "dailyChallenges": {
+      "$date": {
+        ".read": true,
+        "$uid": {
+          ".write": "$uid === auth.uid",
+          ".validate": "newData.hasChildren(['score', 'completed', 'timestamp'])",
+          "score": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "completed": {
+            ".validate": "newData.isBoolean()"
+          },
+          "timestamp": {
+            ".validate": "newData.isNumber()"
           }
         }
       }
@@ -52,6 +97,24 @@
         },
         "email": {
           ".validate": "newData.isString()"
+        },
+        "achievements": {
+          ".validate": "newData.hasChildren(['unlocked', 'lastUpdated'])"
+        },
+        "achievementStats": {
+          ".validate": "newData.hasChild('lastUpdated')"
+        },
+        "challengeStats": {
+          ".validate": "newData.hasChildren(['totalCompleted', 'currentStreak'])",
+          "totalCompleted": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "currentStreak": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          },
+          "longestStreak": {
+            ".validate": "newData.isNumber() && newData.val() >= 0"
+          }
         }
       }
     }

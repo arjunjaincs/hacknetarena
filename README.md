@@ -16,8 +16,11 @@
 ### Why It's Awesome:
 - 🎯 **24 Unique Actions** - 12 per role, 6 random each game
 - ⚡ **18 Powerful Combos** - Chain actions for massive damage
-- 🤖 **Smart AI** - Learns your patterns and adapts
-- 🏆 **Global Leaderboard** - Compete with players worldwide
+- 🤖 **Smart AI** - 3 difficulty levels, learns patterns, adapts strategy
+- 🏆 **Daily Challenges** - New challenge every 24h with 2x score multiplier
+- 🎖️ **50+ Achievements** - Unlock rare achievements & track progress
+- 📊 **Detailed Analytics** - Performance grades, action stats, improvement tips
+- 🏅 **Global Leaderboard** - Compete with players worldwide
 - 📚 **Learn Real Security** - Every action teaches actual concepts
 
 ---
@@ -30,6 +33,8 @@
 - **Combo System**: 18 combos with +13-22 bonus damage → Reward skillful play
 - **Momentum**: Win streaks give +5% success (max +25%) → Snowball advantage
 - **Counter System**: AI predicts patterns → -40% penalty for predictability
+- **Difficulty Levels**: Beginner (30% AI mistakes), Normal (15%), Expert (5%)
+- **Daily Challenges**: 7 unique challenge types with special modifiers
 
 ### 🎨 Visual Polish
 - **3D Background**: Three.js animated cyber grid
@@ -40,7 +45,11 @@
 
 ### 🔥 Competitive
 - **Unique Leaderboard**: Shows best score + total score per player
-- **Profile Stats**: Track wins, losses, win rate, total games
+- **Profile Stats**: Track wins, losses, win rate, total games, challenge streaks
+- **Achievement System**: 50+ achievements across 5 rarity tiers (Common → Legendary)
+- **Daily Challenges**: Complete challenges for 2x score & streak rewards
+- **Performance Grades**: S/A/B/C/D/F grades for Offense, Defense, Strategy, Efficiency
+- **Detailed Analytics**: Round-by-round graphs, action usage charts, success rates
 - **Guest Mode**: Play without login, save scores when ready
 - **Firebase Sync**: Real-time score updates
 

@@ -22,52 +22,52 @@ export const ALL_HACKER_ACTIONS = [
     name: 'Port Scanning',
     icon: '🔍',
     category: 'Network',
-    description: 'Find open network ports',
+    description: 'Scan for open ports and vulnerabilities. Low cost, high reliability. Perfect opener!',
     baseChance: 80,
     energyCost: 8,
     impactRange: [5, 9],
     threatImpact: 5,
     cooldown: 0,
-    educationalNote: 'Reconnaissance to identify vulnerable entry points. Weak but reliable.'
+    educationalNote: 'Reconnaissance phase: Identifies entry points. 💡 Combo Hint: Follow with MITM for Recon Strike (+14 bonus)!'
   },
   {
     id: 'ddos',
     name: 'DDoS Attack',
     icon: '💥',
     category: 'Network',
-    description: 'Flood servers with traffic',
+    description: 'Overwhelm servers with massive traffic. Balanced power and cost. Great follow-up!',
     baseChance: 65,
     energyCost: 12,
     impactRange: [9, 15],
     threatImpact: 9,
     cooldown: 0,
-    educationalNote: 'Distributed Denial of Service overwhelms systems with requests. Medium power.'
+    educationalNote: 'DDoS floods systems with requests. 💡 Combo Hint: Chain with Brute Force for Network Assault (+18 bonus)!'
   },
   {
     id: 'mitm',
     name: 'Man-in-the-Middle',
     icon: '🕵️',
     category: 'Network',
-    description: 'Intercept communications',
+    description: 'Spy on network traffic and steal data. High damage, moderate risk. Stealth attack!',
     baseChance: 55,
     energyCost: 17,
     impactRange: [13, 20],
     threatImpact: 13,
     cooldown: 1,
-    educationalNote: 'Secretly intercepts and relays messages. Strong but risky.'
+    educationalNote: 'Intercepts communications secretly. 💡 Combo Hint: Use after Port Scan for Recon Strike (+14)!'
   },
   {
     id: 'bruteforce',
     name: 'Brute Force',
     icon: '🔨',
     category: 'Network',
-    description: 'Crack passwords rapidly',
+    description: 'Systematically crack passwords. Expensive but devastating. Ultimate network attack!',
     baseChance: 45,
     energyCost: 22,
-    impactRange: [18, 28],
-    threatImpact: 18,
+    impactRange: [14, 22],
+    threatImpact: 14,
     cooldown: 2,
-    educationalNote: 'Automated password cracking. Very powerful but expensive.'
+    educationalNote: 'Automated password cracking. 💡 Combo Hint: After DDoS for Network Assault (+18)!'
   },
 
   // Human Category (4 actions) - WEAK to STRONG
@@ -76,52 +76,52 @@ export const ALL_HACKER_ACTIONS = [
     name: 'Tailgating',
     icon: '🚪',
     category: 'Human',
-    description: 'Follow authorized person',
+    description: 'Sneak in behind authorized personnel. Simple physical breach. Easy entry!',
     baseChance: 75,
     energyCost: 9,
     impactRange: [6, 11],
     threatImpact: 6,
     cooldown: 0,
-    educationalNote: 'Physical security breach. Simple and cheap.'
+    educationalNote: 'Physical security bypass. 💡 Combo Hint: Start social engineering chains here!'
   },
   {
     id: 'pretexting',
     name: 'Pretexting',
     icon: '🎪',
     category: 'Human',
-    description: 'Create false scenario',
+    description: 'Fabricate convincing scenarios to extract info. Moderate power. Deception works!',
     baseChance: 65,
     energyCost: 13,
     impactRange: [10, 16],
     threatImpact: 10,
     cooldown: 0,
-    educationalNote: 'Fabricated scenario to obtain information. Moderate effectiveness.'
+    educationalNote: 'Social manipulation via false scenarios. 💡 Combo Hint: Build trust before phishing!'
   },
   {
     id: 'phishing',
     name: 'Phishing',
     icon: '🎣',
     category: 'Human',
-    description: 'Trick users via fake emails',
+    description: 'Send convincing fake emails to steal credentials. Reliable damage. Classic attack!',
     baseChance: 60,
     energyCost: 16,
     impactRange: [12, 19],
     threatImpact: 12,
     cooldown: 1,
-    educationalNote: 'Social engineering via deceptive emails. Strong and reliable.'
+    educationalNote: 'Email-based social engineering. 💡 Combo Hint: Chain with Social Eng for Social Chain (+15)!'
   },
   {
     id: 'socialeng',
     name: 'Social Engineering',
     icon: '🎭',
     category: 'Human',
-    description: 'Manipulate employees',
+    description: 'Master psychological manipulation. Expensive but powerful. Human weakness!',
     baseChance: 50,
     energyCost: 20,
-    impactRange: [15, 24],
-    threatImpact: 15,
+    impactRange: [12, 19],
+    threatImpact: 12,
     cooldown: 2,
-    educationalNote: 'Advanced psychological manipulation. Very powerful.'
+    educationalNote: 'Advanced manipulation tactics. 💡 Combo Hint: After Phishing for Social Chain (+15)!'
   },
 
   // Software Category (4 actions) - WEAK to STRONG
@@ -130,52 +130,52 @@ export const ALL_HACKER_ACTIONS = [
     name: 'SQL Injection',
     icon: '💉',
     category: 'Software',
-    description: 'Manipulate database queries',
+    description: 'Inject malicious SQL to access databases. Quick and cheap. Web classic!',
     baseChance: 70,
     energyCost: 10,
     impactRange: [7, 13],
     threatImpact: 7,
     cooldown: 0,
-    educationalNote: 'Inserts malicious SQL code. Quick and cheap.'
+    educationalNote: 'Database manipulation via SQL injection. 💡 Combo Hint: Gateway to malware deployment!'
   },
   {
     id: 'malware',
     name: 'Deploy Malware',
     icon: '🦠',
     category: 'Software',
-    description: 'Install malicious code',
+    description: 'Deploy persistent malicious code. Balanced stats. Infection spreads!',
     baseChance: 60,
     energyCost: 15,
     impactRange: [11, 18],
     threatImpact: 11,
     cooldown: 1,
-    educationalNote: 'Malicious software that steals or corrupts data. Balanced.'
+    educationalNote: 'Persistent malicious software. 💡 Combo Hint: Escalate to Ransomware (+19) or Zero-Day!'
   },
   {
     id: 'ransomware',
     name: 'Ransomware',
     icon: '🔐',
     category: 'Software',
-    description: 'Encrypt and demand payment',
+    description: 'Encrypt critical files and demand ransom. High damage. Modern threat!',
     baseChance: 50,
     energyCost: 21,
-    impactRange: [17, 26],
-    threatImpact: 17,
+    impactRange: [14, 21],
+    threatImpact: 14,
     cooldown: 2,
-    educationalNote: 'Encrypts files and demands ransom. Very damaging.'
+    educationalNote: 'File encryption attack. 💡 Combo Hint: After Malware for Escalation (+19) or before Zero-Day (+22)!'
   },
   {
     id: 'zeroday',
     name: 'Zero-Day Exploit',
     icon: '⚡',
     category: 'Software',
-    description: 'Exploit unknown vulnerability',
+    description: 'Exploit undiscovered vulnerabilities. Ultimate power! Game changer!',
     baseChance: 35,
     energyCost: 25,
-    impactRange: [22, 35],
-    threatImpact: 22,
+    impactRange: [17, 28],
+    threatImpact: 17,
     cooldown: 3,
-    educationalNote: 'Exploits unknown bugs. Ultimate power but very risky and expensive.'
+    educationalNote: 'Unknown vulnerability exploitation. 💡 Combo Hint: After Ransomware for Total Lockdown (+22)!'
   }
 ];
 
@@ -190,52 +190,52 @@ export const ALL_DEFENDER_ACTIONS = [
     name: 'Intrusion Detection',
     icon: '🚨',
     category: 'Network',
-    description: 'Detect suspicious activity',
+    description: 'Monitor network for threats. Low cost, high reliability. Essential baseline!',
     baseChance: 80,
     energyCost: 8,
     impactRange: [5, 10],
     threatImpact: -5,
     cooldown: 0,
-    educationalNote: 'Monitors network for malicious activity. Basic but reliable.'
+    educationalNote: 'Network monitoring system. 💡 Combo Hint: Follow with Firewall for Detect & Block (+14)!'
   },
   {
     id: 'firewall',
     name: 'Deploy Firewall',
     icon: '🔥',
     category: 'Network',
-    description: 'Block malicious traffic',
+    description: 'Filter and block malicious traffic. Balanced defense. Core protection!',
     baseChance: 70,
     energyCost: 12,
     impactRange: [9, 15],
     threatImpact: -9,
     cooldown: 0,
-    educationalNote: 'Filters network traffic to block threats. Solid defense.'
+    educationalNote: 'Traffic filtering system. 💡 Combo Hint: After IDS for Detect & Block (+14) or before VPN (+17)!'
   },
   {
     id: 'vpn',
     name: 'VPN Encryption',
     icon: '🔒',
     category: 'Network',
-    description: 'Encrypt all communications',
+    description: 'Create secure encrypted tunnels. High protection. Privacy shield!',
     baseChance: 60,
     energyCost: 17,
     impactRange: [13, 20],
     threatImpact: -13,
     cooldown: 1,
-    educationalNote: 'Creates secure encrypted tunnel. Strong protection.'
+    educationalNote: 'Encrypted communication channels. 💡 Combo Hint: After Firewall for Layered Defense (+17)!'
   },
   {
     id: 'segmentation',
     name: 'Network Segmentation',
     icon: '🧱',
     category: 'Network',
-    description: 'Isolate network sections',
+    description: 'Divide network into isolated zones. Ultimate defense! Containment!',
     baseChance: 50,
     energyCost: 22,
-    impactRange: [18, 27],
-    threatImpact: -18,
+    impactRange: [20, 30],
+    threatImpact: -20,
     cooldown: 2,
-    educationalNote: 'Divides network to contain breaches. Ultimate network defense.'
+    educationalNote: 'Network isolation strategy. 💡 Combo Hint: Final layer in defense chain!'
   },
 
   // Human Category (4 actions) - WEAK to STRONG
@@ -244,52 +244,52 @@ export const ALL_DEFENDER_ACTIONS = [
     name: 'Security Awareness',
     icon: '👁️',
     category: 'Human',
-    description: 'Promote vigilance culture',
+    description: 'Build security-aware culture. Simple and effective. Human firewall!',
     baseChance: 75,
     energyCost: 9,
     impactRange: [6, 11],
     threatImpact: -6,
     cooldown: 0,
-    educationalNote: 'Creates security-conscious workplace. Simple and cheap.'
+    educationalNote: 'Security awareness program. 💡 Combo Hint: Foundation for training programs!'
   },
   {
     id: 'training',
     name: 'Security Training',
     icon: '📚',
     category: 'Human',
-    description: 'Educate staff on threats',
+    description: 'Train staff to recognize attacks. Moderate power. Knowledge is power!',
     baseChance: 65,
     energyCost: 13,
     impactRange: [10, 16],
     threatImpact: -10,
     cooldown: 0,
-    educationalNote: 'Teaches employees to recognize social engineering. Effective.'
+    educationalNote: 'Employee security training. 💡 Combo Hint: Chain with Access Control for Smart Restrictions (+17)!'
   },
   {
     id: 'accesscontrol',
     name: 'Access Control',
     icon: '🚫',
     category: 'Human',
-    description: 'Restrict user permissions',
+    description: 'Implement least-privilege access. Strong defense. Zero trust!',
     baseChance: 55,
     energyCost: 16,
     impactRange: [12, 19],
     threatImpact: -12,
     cooldown: 1,
-    educationalNote: 'Limits access based on role and need. Strong security.'
+    educationalNote: 'Role-based access control. 💡 Combo Hint: After Training for Smart Restrictions (+17)!'
   },
   {
     id: 'mfa',
     name: 'Multi-Factor Auth',
     icon: '🔑',
     category: 'Human',
-    description: 'Require multiple verifications',
+    description: 'Enforce multi-factor authentication. Expensive but secure. Extra layer!',
     baseChance: 45,
     energyCost: 20,
     impactRange: [15, 24],
     threatImpact: -15,
     cooldown: 2,
-    educationalNote: 'Requires multiple forms of authentication. Very secure.'
+    educationalNote: 'Multiple authentication factors. 💡 Combo Hint: Ultimate human defense!'
   },
 
   // Software Category (4 actions) - WEAK to STRONG
@@ -298,52 +298,52 @@ export const ALL_DEFENDER_ACTIONS = [
     name: 'Backup Data',
     icon: '💾',
     category: 'Software',
-    description: 'Create recovery points',
+    description: 'Create data recovery points. Essential safety net. Always backup!',
     baseChance: 80,
     energyCost: 10,
     impactRange: [7, 13],
     threatImpact: -7,
     cooldown: 0,
-    educationalNote: 'Ensures data can be restored after attack. Essential baseline.'
+    educationalNote: 'Data backup system. 💡 Combo Hint: Foundation for software defense!'
   },
   {
     id: 'antivirus',
     name: 'Antivirus Scan',
     icon: '🛡️',
     category: 'Software',
-    description: 'Detect and remove malware',
+    description: 'Scan and eliminate malware. Reliable cleanup. Virus hunter!',
     baseChance: 65,
     energyCost: 14,
     impactRange: [10, 17],
     threatImpact: -10,
     cooldown: 1,
-    educationalNote: 'Scans for and removes malicious software. Standard protection.'
+    educationalNote: 'Malware detection and removal. 💡 Combo Hint: Follow with Patch for Proactive Defense (+18)!'
   },
   {
     id: 'patch',
     name: 'Patch Systems',
     icon: '🔧',
     category: 'Software',
-    description: 'Fix known vulnerabilities',
+    description: 'Update systems to fix vulnerabilities. Proactive defense. Stay current!',
     baseChance: 55,
     energyCost: 18,
     impactRange: [14, 21],
     threatImpact: -14,
     cooldown: 1,
-    educationalNote: 'Updates software to fix security holes. Proactive defense.'
+    educationalNote: 'System patching and updates. 💡 Combo Hint: After Antivirus (+18) or before Encryption (+21)!'
   },
   {
     id: 'encryption',
     name: 'Data Encryption',
     icon: '🔐',
     category: 'Software',
-    description: 'Encrypt sensitive data',
+    description: 'Encrypt all sensitive data. Ultimate protection! Unbreakable!',
     baseChance: 40,
     energyCost: 23,
-    impactRange: [19, 29],
-    threatImpact: -19,
+    impactRange: [22, 32],
+    threatImpact: -22,
     cooldown: 2,
-    educationalNote: 'Protects data even if stolen. Maximum software protection.'
+    educationalNote: 'Data encryption at rest. 💡 Combo Hint: After Patch for Hardened Security (+21)!'
   }
 ];
 
@@ -404,35 +404,35 @@ export const DEFENDER_ACTIONS = ALL_DEFENDER_ACTIONS.slice(0, 6);
 // ============================================================================
 
 export const COMBO_DEFINITIONS = [
-  // Hacker Network Combos (4)
+  // Hacker Network Combos (4) - Linear progression, no loops
   { from: 'portscan', to: 'mitm', name: '🔍 Recon Strike', bonus: 14, description: 'Scan then intercept' },
   { from: 'portscan', to: 'bruteforce', name: '🔍 Targeted Breach', bonus: 16, description: 'Find weakness, exploit it' },
+  { from: 'mitm', to: 'bruteforce', name: '🕵️ Intercept & Crack', bonus: 17, description: 'Intercept then brute force' },
   { from: 'ddos', to: 'bruteforce', name: '💥 Network Assault', bonus: 18, description: 'Overwhelm then crack' },
-  { from: 'mitm', to: 'ddos', name: '🕵️ Disruption Chain', bonus: 15, description: 'Intercept then flood' },
   
-  // Hacker Human Combos (4)
+  // Hacker Human Combos (4) - Linear progression, no loops
   { from: 'tailgating', to: 'pretexting', name: '🚪 Inside Job', bonus: 13, description: 'Physical then social' },
   { from: 'pretexting', to: 'phishing', name: '🎪 Trust Exploit', bonus: 16, description: 'Build trust, then strike' },
   { from: 'phishing', to: 'socialeng', name: '🎣 Social Chain', bonus: 18, description: 'Email to manipulation' },
-  { from: 'socialeng', to: 'tailgating', name: '🎭 Full Access', bonus: 17, description: 'Manipulate then enter' },
+  { from: 'tailgating', to: 'socialeng', name: '🚪 Direct Manipulation', bonus: 15, description: 'Enter then manipulate' },
   
-  // Hacker Software Combos (4)
+  // Hacker Software Combos (4) - Linear progression, no loops
   { from: 'sqlinjection', to: 'malware', name: '💉 Database Infection', bonus: 15, description: 'Inject then deploy' },
   { from: 'malware', to: 'ransomware', name: '🦠 Escalation', bonus: 19, description: 'Infect then encrypt' },
   { from: 'ransomware', to: 'zeroday', name: '🔐 Total Lockdown', bonus: 22, description: 'Encrypt then exploit' },
   { from: 'phishing', to: 'malware', name: '🎣 Trojan Horse', bonus: 17, description: 'Trick into installing' },
   
-  // Defender Network Combos (3)
+  // Defender Network Combos (3) - Linear progression
   { from: 'ids', to: 'firewall', name: '🚨 Detect & Block', bonus: 14, description: 'Spot then stop' },
   { from: 'firewall', to: 'vpn', name: '🔥 Layered Defense', bonus: 17, description: 'Block then encrypt' },
   { from: 'vpn', to: 'segmentation', name: '🔒 Isolation Protocol', bonus: 20, description: 'Encrypt then isolate' },
   
-  // Defender Human Combos (3)
+  // Defender Human Combos (3) - Linear progression
   { from: 'awareness', to: 'training', name: '👁️ Educated Defense', bonus: 15, description: 'Aware then trained' },
   { from: 'training', to: 'accesscontrol', name: '📚 Smart Restrictions', bonus: 17, description: 'Train then restrict' },
   { from: 'accesscontrol', to: 'mfa', name: '🚫 Zero Trust', bonus: 19, description: 'Restrict then verify' },
   
-  // Defender Software Combos (3)
+  // Defender Software Combos (3) - Linear progression
   { from: 'backup', to: 'antivirus', name: '💾 Protected Recovery', bonus: 16, description: 'Backup then clean' },
   { from: 'antivirus', to: 'patch', name: '🛡️ Proactive Defense', bonus: 18, description: 'Clean then fix' },
   { from: 'patch', to: 'encryption', name: '🔧 Hardened Security', bonus: 21, description: 'Fix then encrypt' }

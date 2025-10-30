@@ -1,23 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { getUserGameHistory, getUserStats } from '../firebase/gameHistory';
 import { getUserLeaderboardStats } from '../firebase/leaderboard';
+import { getAchievements, getAchievementStats } from '../firebase/achievements';
+import { getAllAchievementsWithStatus, getCompletionPercentage, ACHIEVEMENT_CATEGORIES, RARITY_CONFIG } from '../game/achievements';
 
 export default function Profile({ userId, playerName, onBack }) {
   const [games, setGames] = useState([]);
   const [stats, setStats] = useState(null);
   const [leaderboardStats, setLeaderboardStats] = useState(null);
+  const [achievements, setAchievements] = useState([]);
+  const [achievementStats, setAchievementStats] = useState({});
+  const [unlockedIds, setUnlockedIds] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
-      const [gamesData, statsData, lbStats] = await Promise.all([
+      const [gamesData, statsData, lbStats, unlockedAchievements, achStats] = await Promise.all([
         getUserGameHistory(userId, 20),
         getUserStats(userId),
-        getUserLeaderboardStats(userId)
+        getUserLeaderboardStats(userId),
+        getAchievements(userId),
+        getAchievementStats(userId)
       ]);
       setGames(gamesData);
       setStats(statsData);
       setLeaderboardStats(lbStats);
+      setUnlockedIds(unlockedAchievements || []);
+      setAchievementStats(achStats || {});
+      setAchievements(getAllAchievementsWithStatus(unlockedAchievements || [], achStats || {}));
       setLoading(false);
     }
     if (userId) {
@@ -63,6 +74,59 @@ export default function Profile({ userId, playerName, onBack }) {
           </div>
         )}
 
+        {/* Achievements Section */}
+        <div className="bg-dark-card border-2 border-cyber-purple rounded-lg p-4 md:p-6 mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-cyber-purple">
+              🏆 Achievements
+            </h2>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-cyber-purple">
+                {getCompletionPercentage(unlockedIds)}%
+              </div>
+              <div className="text-xs text-gray-400">
+                {unlockedIds.length} / {achievements.length} Unlocked
+              </div>
+            </div>
+          </div>
+
+          {/* Category Filter */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                selectedCategory === 'all'
+                  ? 'bg-cyber-purple text-white'
+                  : 'bg-dark-bg text-gray-400 hover:text-white'
+              }`}
+            >
+              All
+            </button>
+            {Object.entries(ACHIEVEMENT_CATEGORIES).map(([key, cat]) => (
+              <button
+                key={key}
+                onClick={() => setSelectedCategory(key)}
+                className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                  selectedCategory === key
+                    ? 'bg-cyber-purple text-white'
+                    : 'bg-dark-bg text-gray-400 hover:text-white'
+                }`}
+              >
+                {cat.icon} {cat.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Achievement Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {achievements
+              .filter(a => selectedCategory === 'all' || a.category === selectedCategory)
+              .map(achievement => (
+                <AchievementCard key={achievement.id} achievement={achievement} />
+              ))}
+          </div>
+        </div>
+
         {/* Game History */}
         <div className="bg-dark-card border-2 border-cyber-blue rounded-lg p-4 md:p-6">
           <h2 className="text-2xl font-bold text-cyber-blue mb-4">
@@ -91,7 +155,9 @@ function StatCard({ label, value, icon, color = 'blue' }) {
     blue: 'border-cyber-blue text-cyber-blue',
     green: 'border-green-500 text-green-400',
     red: 'border-red-500 text-red-400',
-    yellow: 'border-yellow-500 text-yellow-400'
+    yellow: 'border-yellow-500 text-yellow-400',
+    cyan: 'border-cyan-500 text-cyan-400',
+    purple: 'border-purple-500 text-purple-400'
   };
 
   return (
@@ -99,6 +165,87 @@ function StatCard({ label, value, icon, color = 'blue' }) {
       <div className="text-3xl md:text-4xl mb-2">{icon}</div>
       <div className="text-xl md:text-2xl font-bold">{value}</div>
       <div className="text-xs md:text-sm text-gray-400">{label}</div>
+    </div>
+  );
+}
+
+function AchievementCard({ achievement }) {
+  const rarity = RARITY_CONFIG[achievement.rarity] || RARITY_CONFIG.common;
+  const isUnlocked = achievement.unlocked;
+  
+  return (
+    <div
+      className={`relative bg-dark-bg rounded-lg p-4 border-2 transition-all duration-300 ${
+        isUnlocked
+          ? 'hover:scale-105 cursor-pointer'
+          : 'opacity-50 grayscale'
+      }`}
+      style={{
+        borderColor: isUnlocked ? rarity.color : '#4B5563',
+        boxShadow: isUnlocked ? `0 0 20px ${rarity.glow}` : 'none'
+      }}
+    >
+      {/* Locked overlay */}
+      {!isUnlocked && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-lg">
+          <div className="text-4xl">🔒</div>
+        </div>
+      )}
+      
+      {/* Icon */}
+      <div className="text-center mb-3">
+        <div
+          className="text-5xl inline-block"
+          style={{
+            filter: isUnlocked ? `drop-shadow(0 0 10px ${rarity.color})` : 'none'
+          }}
+        >
+          {achievement.icon}
+        </div>
+      </div>
+      
+      {/* Name */}
+      <h3 className="text-lg font-bold text-white text-center mb-2">
+        {achievement.name}
+      </h3>
+      
+      {/* Description */}
+      <p className="text-sm text-gray-300 text-center mb-3 min-h-[40px]">
+        {achievement.description}
+      </p>
+      
+      {/* Progress bar (if has progress) */}
+      {achievement.progress && achievement.progress.max > 1 && (
+        <div className="mb-3">
+          <div className="flex justify-between text-xs text-gray-400 mb-1">
+            <span>Progress</span>
+            <span>{achievement.progress.current} / {achievement.progress.max}</span>
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div
+              className="h-full transition-all duration-500"
+              style={{
+                width: `${achievement.progress.percentage}%`,
+                backgroundColor: rarity.color
+              }}
+            />
+          </div>
+        </div>
+      )}
+      
+      {/* Rarity badge */}
+      <div className="flex justify-center">
+        <span
+          className="text-xs font-bold px-3 py-1 rounded-full"
+          style={{
+            backgroundColor: `${rarity.color}20`,
+            color: rarity.color,
+            border: `1px solid ${rarity.color}`
+          }}
+        >
+          {rarity.name}
+        </span>
+      </div>
     </div>
   );
 }

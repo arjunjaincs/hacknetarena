@@ -2,23 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { INITIAL_STATE, processRound } from '../game/gameEngine';
 import { getGameActions, getSynergyDescription, getAvailableActions } from '../game/gameActions';
 import { chooseAIAction } from '../game/gameAI';
-import { playClickSound, playSuccessSound, playFailSound, playComboSound, playCounterSound, playThreatCriticalSound, playEnergyLowSound, initAudio } from '../game/soundEffects';
+import { playClickSound, playSuccessSound, playFailSound, playComboSound, playCounterSound, playThreatCriticalSound, playEnergyLowSound, playAchievementSound, initAudio } from '../game/soundEffects';
 import ActionCard from '../components/ActionCard';
 import ThreatMeter from '../components/ThreatMeter';
 import BattleLog from '../components/BattleLog';
 import MiniReward from '../components/MiniReward';
 import QuickStats from '../components/QuickStats';
+import AchievementPopup from '../components/AchievementPopup';
+import { checkAchievements } from '../game/achievements';
+import { getAchievementStats, saveAchievements, saveAchievementStats, getAchievements } from '../firebase/achievements';
 
-export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit }) {
+export default function Game({ playerRole, playerName, userId, difficulty = 'normal', onGameEnd, onQuit }) {
   // Generate random action set for this game
   const [gameActions] = useState(() => getGameActions());
+  
+  // Get difficulty settings for player energy bonus
+  const difficultySettings = {
+    easy: { playerEnergyBonus: 20 },
+    normal: { playerEnergyBonus: 0 },
+    hard: { playerEnergyBonus: 0 }
+  };
+  const playerEnergyBonus = difficultySettings[difficulty]?.playerEnergyBonus || 0;
   
   const [gameState, setGameState] = useState({
     ...INITIAL_STATE,
     playerRole,
     playerName,
     userId,
-    gameActions // Store in state for AI and engine
+    difficulty,
+    gameActions, // Store in state for AI and engine
+    // Apply player energy bonus for easy mode
+    energyHacker: playerRole === 'hacker' ? 100 + playerEnergyBonus : 100,
+    energyDefender: playerRole === 'defender' ? 100 + playerEnergyBonus : 100
   });
   
   const [selectedAction, setSelectedAction] = useState(null);
@@ -28,6 +43,20 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
   const [miniRewards, setMiniRewards] = useState([]);
   const [quickStats, setQuickStats] = useState(null);
   const [previousThreat, setPreviousThreat] = useState(gameState.threatLevel);
+  
+  // Achievement system state
+  const [achievementQueue, setAchievementQueue] = useState([]);
+  const [currentAchievement, setCurrentAchievement] = useState(null);
+  const [achievementStats, setAchievementStats] = useState({});
+  const [unlockedAchievements, setUnlockedAchievements] = useState([]);
+  const [gameStats, setGameStats] = useState({
+    combosInGame: 0,
+    maxThreatInGame: 0,
+    minThreatInGame: 100,
+    damageTaken: 0,
+    countersInGame: 0,
+    uniqueCombosInGame: new Set()
+  });
   
   // Get player's info
   const playerEnergy = playerRole === 'hacker' ? gameState.energyHacker : gameState.energyDefender;
@@ -40,6 +69,27 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
   const potentialSynergy = selectedAction && playerLastActions.length > 0
     ? getSynergyDescription(selectedAction.id, playerLastActions[playerLastActions.length - 1])
     : null;
+  
+  // Load achievement data on mount
+  useEffect(() => {
+    if (userId) {
+      getAchievementStats(userId).then(stats => {
+        setAchievementStats(stats || {});
+      });
+      getAchievements(userId).then(unlocked => {
+        setUnlockedAchievements(unlocked || []);
+      });
+    }
+  }, [userId]);
+  
+  // Handle achievement queue
+  useEffect(() => {
+    if (!currentAchievement && achievementQueue.length > 0) {
+      setCurrentAchievement(achievementQueue[0]);
+      setAchievementQueue(prev => prev.slice(1));
+      playAchievementSound();
+    }
+  }, [achievementQueue, currentAchievement]);
   
   // Handle action selection
   const handleActionSelect = (action) => {
@@ -144,6 +194,38 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
         setIsThinking(false);
         setSelectedAction(null);
         
+        // Track game stats for achievements
+        setGameStats(prev => {
+          const newStats = { ...prev };
+          
+          // Track combos
+          if (lastRound.hackerSynergy || lastRound.defenderSynergy) {
+            newStats.combosInGame += 1;
+            const comboName = lastRound.hackerSynergy?.name || lastRound.defenderSynergy?.name;
+            if (comboName) {
+              newStats.uniqueCombosInGame = new Set([...prev.uniqueCombosInGame, comboName]);
+            }
+          }
+          
+          // Track counters
+          if (lastRound.hackerCountered) {
+            newStats.countersInGame += 1;
+          }
+          
+          // Track threat levels
+          newStats.maxThreatInGame = Math.max(prev.maxThreatInGame, newState.threatLevel);
+          newStats.minThreatInGame = Math.min(prev.minThreatInGame, newState.threatLevel);
+          
+          // Track damage taken (for perfect game achievement)
+          if (playerRole === 'defender' && newState.threatLevel > gameState.threatLevel) {
+            newStats.damageTaken += (newState.threatLevel - gameState.threatLevel);
+          } else if (playerRole === 'hacker' && newState.networkIntegrity < gameState.networkIntegrity) {
+            newStats.damageTaken += (gameState.networkIntegrity - newState.networkIntegrity);
+          }
+          
+          return newStats;
+        });
+        
         // Play enhanced sounds
         if (lastRound.hackerSynergy || lastRound.defenderSynergy) {
           playComboSound();
@@ -198,8 +280,78 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
     setRoundResult(null);
     setSelectedAction(null); // Clear selection for next round
     
-    // If game is over, go to results screen
-    if (isGameOver) {
+    // If game is over, go to results screen and check achievements
+    if (isGameOver && userId) {
+      // Calculate final stats
+      const won = gameState.winner === playerRole;
+      const finalScore = gameState.score || 0;
+      const rounds = gameState.round;
+      const finalEnergy = playerEnergy;
+      
+      // Update achievement stats
+      const newStats = {
+        ...achievementStats,
+        totalWins: (achievementStats.totalWins || 0) + (won ? 1 : 0),
+        totalGames: (achievementStats.totalGames || 0) + 1,
+        bestScore: Math.max(achievementStats.bestScore || 0, finalScore),
+        totalScore: (achievementStats.totalScore || 0) + finalScore,
+        totalCombos: (achievementStats.totalCombos || 0) + gameStats.combosInGame,
+        maxCombosInGame: Math.max(achievementStats.maxCombosInGame || 0, gameStats.combosInGame),
+        uniqueCombos: Math.max(achievementStats.uniqueCombos || 0, gameStats.uniqueCombosInGame.size),
+        countersExecuted: (achievementStats.countersExecuted || 0) + gameStats.countersInGame,
+        
+        // Role-specific
+        hackerWins: (achievementStats.hackerWins || 0) + (won && playerRole === 'hacker' ? 1 : 0),
+        defenderWins: (achievementStats.defenderWins || 0) + (won && playerRole === 'defender' ? 1 : 0),
+        
+        // Special conditions
+        perfectGames: (achievementStats.perfectGames || 0) + (won && gameStats.damageTaken === 0 ? 1 : 0),
+        comebackWins: (achievementStats.comebackWins || 0) + (won && gameStats.maxThreatInGame > 80 ? 1 : 0),
+        lowEnergyWins: (achievementStats.lowEnergyWins || 0) + (won && finalEnergy < 20 ? 1 : 0),
+        fastWins: (achievementStats.fastWins || 0) + (won && rounds <= 8 ? 1 : 0),
+        ultraFastWins: (achievementStats.ultraFastWins || 0) + (won && rounds <= 5 ? 1 : 0),
+        longGames: (achievementStats.longGames || 0) + (won && rounds >= 20 ? 1 : 0),
+        maxThreatReached: (achievementStats.maxThreatReached || 0) + (playerRole === 'hacker' && gameState.threatLevel >= 100 ? 1 : 0),
+        lowThreatGames: (achievementStats.lowThreatGames || 0) + (won && playerRole === 'defender' && gameStats.maxThreatInGame < 40 ? 1 : 0),
+        maxMomentumReached: (achievementStats.maxMomentumReached || 0) + (playerMomentum >= 5 ? 1 : 0),
+        
+        // Win streak
+        winStreak: won ? (achievementStats.winStreak || 0) + 1 : 0,
+        maxWinStreak: Math.max(achievementStats.maxWinStreak || 0, won ? (achievementStats.winStreak || 0) + 1 : 0)
+      };
+      
+      // Check for new achievements
+      const newAchievements = checkAchievements(newStats, unlockedAchievements);
+      
+      let newAchievementIds = [];
+      if (newAchievements.length > 0) {
+        // Show first achievement immediately
+        setCurrentAchievement(newAchievements[0]);
+        playAchievementSound();
+        
+        // Queue the rest
+        if (newAchievements.length > 1) {
+          setAchievementQueue(newAchievements.slice(1));
+        }
+        
+        // Update unlocked list
+        const newIds = [...unlockedAchievements, ...newAchievements.map(a => a.id)];
+        setUnlockedAchievements(newIds);
+        newAchievementIds = newAchievements.map(a => a.id);
+        
+        // Save to Firebase
+        saveAchievements(userId, newIds);
+      }
+      
+      // Save stats
+      saveAchievementStats(userId, newStats);
+      
+      // Delay transition to show achievements
+      const delay = newAchievements.length > 0 ? 3500 : 300;
+      setTimeout(() => {
+        onGameEnd({ ...gameState, newAchievements: newAchievementIds });
+      }, delay);
+    } else if (isGameOver) {
       setTimeout(() => {
         onGameEnd(gameState);
       }, 300);
@@ -216,9 +368,18 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
         <div className="bg-dark-card border border-gray-600 rounded-lg p-3 md:p-4 mb-3 md:mb-4">
           <div className="flex justify-between items-center flex-wrap gap-2">
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-cyber-blue">
-                Round {gameState.round}
-              </h1>
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="text-xl md:text-2xl font-bold text-cyber-blue">
+                  Round {gameState.round}
+                </h1>
+                <span className={`text-xs px-2 py-1 rounded font-bold ${
+                  difficulty === 'easy' ? 'bg-green-900/30 text-green-400 border border-green-500' :
+                  difficulty === 'hard' ? 'bg-red-900/30 text-red-400 border border-red-500' :
+                  'bg-blue-900/30 text-blue-400 border border-blue-500'
+                }`}>
+                  {difficulty === 'easy' ? 'BEGINNER' : difficulty === 'hard' ? 'EXPERT' : 'NORMAL'}
+                </span>
+              </div>
               <p className="text-sm text-gray-400">
                 {playerRole === 'hacker' ? '🎯 Hacker' : '🛡️ Defender'}: {playerName}
               </p>
@@ -345,6 +506,16 @@ export default function Game({ playerRole, playerName, userId, onGameEnd, onQuit
         />
       ))}
       
+      {/* Achievement Popup */}
+      {currentAchievement && (
+        <AchievementPopup
+          achievement={currentAchievement}
+          onDismiss={() => {
+            setCurrentAchievement(null);
+          }}
+        />
+      )}
+      
       {/* Quick Stats Panel */}
       {quickStats && (
         <QuickStats 
@@ -448,3 +619,6 @@ function RoundResultModal({ result, playerRole, onClose }) {
     </div>
   );
 }
+
+// Add AchievementPopup before the closing of main component
+// This will be added in the main Game component return

@@ -26,12 +26,42 @@ import { getAvailableActions, getSynergyDescription, getActionById } from './gam
 import { calculateSuccess } from './gameEngine.js';
 
 // ============================================================================
-// CONSTANTS
+// CONSTANTS & DIFFICULTY SETTINGS
 // ============================================================================
 
-const MISTAKE_PROBABILITY = 0.15;
-const COMBO_BONUS_MULTIPLIER = 1.3;
-const COUNTER_BONUS_MULTIPLIER = 1.4;
+export const DIFFICULTY_SETTINGS = {
+  easy: {
+    name: 'Beginner',
+    mistakeProbability: 0.30,
+    optimalPlay: 0.60,
+    comboBonus: 1.1,
+    counterBonus: 1.2,
+    energyRegen: 12,
+    playerEnergyBonus: 20,
+    scoreMultiplier: 0.8
+  },
+  normal: {
+    name: 'Normal',
+    mistakeProbability: 0.15,
+    optimalPlay: 0.85,
+    comboBonus: 1.3,
+    counterBonus: 1.4,
+    energyRegen: 15,
+    playerEnergyBonus: 0,
+    scoreMultiplier: 1.0
+  },
+  hard: {
+    name: 'Expert',
+    mistakeProbability: 0.05,
+    optimalPlay: 0.95,
+    comboBonus: 1.5,
+    counterBonus: 1.6,
+    energyRegen: 18,
+    playerEnergyBonus: 0,
+    scoreMultiplier: 1.5
+  }
+};
+
 const HIGH_DAMAGE_THRESHOLD = 12;
 
 // AI Personalities - adds variety to gameplay
@@ -72,6 +102,10 @@ export function chooseAIAction(gameState) {
   const aiMomentum = aiRole === 'hacker' ? gameState.hackerMomentum : gameState.defenderMomentum;
   const aiLastActions = aiRole === 'hacker' ? gameState.lastHackerActions : gameState.lastDefenderActions;
   
+  // Get difficulty settings
+  const difficulty = gameState.difficulty || 'normal';
+  const difficultyConfig = DIFFICULTY_SETTINGS[difficulty];
+  
   // Get available actions (not on cooldown, enough energy)
   const availableActions = getAvailableActions(aiRole, aiEnergy, aiCooldowns, gameState.gameActions);
   
@@ -88,8 +122,8 @@ export function chooseAIAction(gameState) {
     );
   }
   
-  // 15% chance to make a "mistake" (random choice for balance)
-  if (Math.random() < MISTAKE_PROBABILITY) {
+  // Difficulty-based mistake probability
+  if (Math.random() < difficultyConfig.mistakeProbability) {
     return availableActions[Math.floor(Math.random() * availableActions.length)];
   }
   
@@ -104,16 +138,16 @@ export function chooseAIAction(gameState) {
   const evaluations = availableActions.map(action => {
     let ev = calculateExpectedValue(action, gameState, aiRole, aiMomentum);
     
-    // Bonus for synergy with last action
+    // Bonus for synergy with last action (difficulty-based)
     if (aiLastActions.length > 0) {
       const lastAction = aiLastActions[aiLastActions.length - 1];
       const synergy = getSynergyDescription(action.id, lastAction);
       if (synergy) {
-        ev *= COMBO_BONUS_MULTIPLIER;
+        ev *= difficultyConfig.comboBonus;
       }
     }
     
-    // Counter system bonuses
+    // Counter system bonuses (difficulty-based)
     const counters = {
       'firewall': 'Network',
       'training': 'Human',
@@ -123,7 +157,7 @@ export function chooseAIAction(gameState) {
     // Bonus for countering predicted player move
     if (aiRole === 'defender' && predictedPlayerCategory) {
       if (counters[action.id] === predictedPlayerCategory) {
-        ev *= COUNTER_BONUS_MULTIPLIER;
+        ev *= difficultyConfig.counterBonus;
       }
     }
     

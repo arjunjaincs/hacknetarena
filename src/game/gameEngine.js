@@ -44,6 +44,7 @@ export const INITIAL_STATE = {
   gameOver: false,
   winner: null,
   lowThreatRounds: 0,
+  difficulty: 'normal',
   
   // Core metrics
   energyHacker: 100,
@@ -79,7 +80,16 @@ export const INITIAL_STATE = {
   // Stats
   combosEarned: 0,
   totalDamageDealt: 0,
-  totalDamageBlocked: 0
+  totalDamageBlocked: 0,
+  
+  // Detailed analytics
+  roundHistory: [], // Track threat/network/energy per round
+  actionUsage: {}, // Track how many times each action was used
+  actionSuccess: {}, // Track success rate per action
+  damageByAction: {}, // Track damage dealt by each action
+  energySpent: 0,
+  successfulActions: 0,
+  failedActions: 0
 };
 
 // ============================================================================
@@ -332,9 +342,23 @@ export function processRound(state, playerAction, aiAction) {
     newState.energyDefender -= defenderAction.energyCost;
   }
   
-  // Regenerate energy AFTER deduction (+15 per round, but not exceeding max)
-  newState.energyHacker = Math.max(0, Math.min(MAX_ENERGY, newState.energyHacker + ENERGY_REGEN_PER_ROUND));
-  newState.energyDefender = Math.max(0, Math.min(MAX_ENERGY, newState.energyDefender + ENERGY_REGEN_PER_ROUND));
+  // Regenerate energy AFTER deduction (difficulty-based for AI)
+  // Import difficulty settings
+  const difficultySettings = {
+    easy: { aiRegen: 12, playerRegen: 15 },
+    normal: { aiRegen: 15, playerRegen: 15 },
+    hard: { aiRegen: 18, playerRegen: 15 }
+  };
+  const difficulty = newState.difficulty || 'normal';
+  const regenSettings = difficultySettings[difficulty];
+  
+  // Apply different regen rates based on role
+  const playerRole = newState.playerRole;
+  const hackerRegen = playerRole === 'hacker' ? regenSettings.playerRegen : regenSettings.aiRegen;
+  const defenderRegen = playerRole === 'defender' ? regenSettings.playerRegen : regenSettings.aiRegen;
+  
+  newState.energyHacker = Math.max(0, Math.min(MAX_ENERGY, newState.energyHacker + hackerRegen));
+  newState.energyDefender = Math.max(0, Math.min(MAX_ENERGY, newState.energyDefender + defenderRegen));
   
   // Validate energy never goes negative
   if (newState.energyHacker < 0) {
@@ -369,15 +393,51 @@ export function processRound(state, playerAction, aiAction) {
   newState.lastDefenderActions.push(defenderAction.id);
   if (newState.lastDefenderActions.length > 2) newState.lastDefenderActions.shift();
   
+  // Track detailed analytics
+  newState.roundHistory = [...(newState.roundHistory || []), {
+    round: newState.round,
+    threatLevel: Math.round(newState.threatLevel),
+    networkIntegrity: Math.round(newState.networkIntegrity),
+    energyHacker: Math.round(newState.energyHacker),
+    energyDefender: Math.round(newState.energyDefender)
+  }];
+  
+  // Track action usage
+  newState.actionUsage = { ...(newState.actionUsage || {}) };
+  newState.actionUsage[playerAction.id] = (newState.actionUsage[playerAction.id] || 0) + 1;
+  
+  // Track action success
+  newState.actionSuccess = { ...(newState.actionSuccess || {}) };
+  const playerResult = state.playerRole === 'hacker' ? hackerResult : defenderResult;
+  if (!newState.actionSuccess[playerAction.id]) {
+    newState.actionSuccess[playerAction.id] = { success: 0, total: 0 };
+  }
+  newState.actionSuccess[playerAction.id].total += 1;
+  if (playerResult.success) {
+    newState.actionSuccess[playerAction.id].success += 1;
+    newState.successfulActions = (newState.successfulActions || 0) + 1;
+  } else {
+    newState.failedActions = (newState.failedActions || 0) + 1;
+  }
+  
+  // Track damage by action
+  if (playerResult.success && roundDamage > 0) {
+    newState.damageByAction = { ...(newState.damageByAction || {}) };
+    newState.damageByAction[playerAction.id] = (newState.damageByAction[playerAction.id] || 0) + roundDamage;
+  }
+  
+  // Track energy spent
+  newState.energySpent = (newState.energySpent || 0) + playerAction.energyCost;
+  
   // Add to history
   newState.history.push({
     round: newState.round,
     hackerAction: hackerAction.name,
+    defenderAction: defenderAction.name,
     hackerSuccess: hackerResult.success,
     hackerChance: hackerResult.finalChance,
-    hackerCountered,
     hackerSynergy: hackerResult.synergy,
-    defenderAction: defenderAction.name,
+    hackerCountered,
     defenderSuccess: defenderResult.success,
     defenderChance: defenderResult.finalChance,
     defenderSynergy: defenderResult.synergy,
@@ -460,8 +520,17 @@ function calculateFinalScores(state) {
     state.totalDamageBlocked * 0.3 +
     (100 - state.energyDefender) * 0.1;
   
-  state.playerScore = state.playerRole === 'hacker' ? Math.round(hackerScore) : Math.round(defenderScore);
+  // Apply difficulty multiplier
+  const difficultyMultipliers = {
+    easy: 0.8,
+    normal: 1.0,
+    hard: 1.5
+  };
+  const multiplier = difficultyMultipliers[state.difficulty || 'normal'];
+  
+  state.playerScore = Math.round((state.playerRole === 'hacker' ? hackerScore : defenderScore) * multiplier);
   state.aiScore = state.playerRole === 'hacker' ? Math.round(defenderScore) : Math.round(hackerScore);
+  state.difficultyMultiplier = multiplier;
 }
 
 export { calculateSuccess, checkSynergy, isActionCountered };

@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import Home from './pages/Home';
 import Game from './pages/Game';
+import DailyChallenge from './pages/DailyChallenge';
 import Results from './pages/Results';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
@@ -27,6 +28,7 @@ function App() {
   const [userId, setUserId] = useState(null);
   const [userEmail, setUserEmail] = useState('');
   const [showLogin, setShowLogin] = useState(false);
+  const [dailyChallengeData, setDailyChallengeData] = useState(null);
   
   // Check Firebase Auth state (works across devices)
   useEffect(() => {
@@ -82,9 +84,10 @@ function App() {
     // Firebase Auth handles persistence automatically
   };
   
-  const handleStartGame = (role, name) => {
+  const handleStartGame = (role, name, difficulty = 'normal') => {
     setPlayerRole(role);
     setPlayerName(name);
+    setGameState({ difficulty }); // Store difficulty for Game component
     setCurrentScreen('game');
   };
   
@@ -114,6 +117,12 @@ function App() {
   
   const handleViewGuide = () => {
     setCurrentScreen('guide');
+  };
+  
+  const handleStartDailyChallenge = (challenge) => {
+    setDailyChallengeData(challenge);
+    setPlayerRole(challenge.role);
+    setCurrentScreen('dailyChallenge');
   };
   
   const handleLogout = () => {
@@ -159,10 +168,11 @@ function App() {
       <div className="relative z-10">
         {currentScreen === 'home' && (
           <Home 
-            onStartGame={handleStartGame} 
+            onStartGame={handleStartGame}
+            onStartDailyChallenge={handleStartDailyChallenge}
+            userId={userId}
             isLoggedIn={isLoggedIn}
             playerName={playerName}
-            userId={userId}
           />
         )}
         
@@ -170,6 +180,17 @@ function App() {
           <Game 
             playerRole={playerRole}
             playerName={playerName}
+            userId={userId}
+            difficulty={gameState?.difficulty || 'normal'}
+            onGameEnd={handleGameEnd}
+            onQuit={handleBackToHome}
+          />
+        )}
+        
+        {currentScreen === 'dailyChallenge' && dailyChallengeData && (
+          <DailyChallenge
+            challenge={dailyChallengeData}
+            playerName={playerName || 'Player'}
             userId={userId}
             onGameEnd={handleGameEnd}
             onQuit={handleBackToHome}
@@ -181,6 +202,7 @@ function App() {
             gameState={gameState}
             onPlayAgain={handlePlayAgain}
             onViewLeaderboard={handleViewLeaderboard}
+            newAchievements={gameState.newAchievements || []}
           />
         )}
         
