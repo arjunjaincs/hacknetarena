@@ -193,7 +193,7 @@ export default function Home({ onStartGame, onStartDailyChallenge, userId, isLog
         </div>
         
         {/* Difficulty Selector */}
-        <div className="mt-8 bg-dark-card backdrop-blur-sm border-2 border-gray-700 rounded-xl p-6">
+        <div className="mt-8 bg-dark-card/80 backdrop-blur-md border-2 border-gray-700 rounded-xl p-6">
           <h3 className="text-xl font-bold text-center text-cyber-blue mb-4">⚙️ Select Difficulty</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {Object.entries(DIFFICULTY_SETTINGS).map(([key, config]) => (
@@ -224,7 +224,7 @@ export default function Home({ onStartGame, onStartDailyChallenge, userId, isLog
         
         {/* Daily Challenge */}
         {dailyChallenge && (
-          <div className="mt-8 bg-gradient-to-r from-yellow-900/80 to-orange-900/80 backdrop-blur-sm border-2 border-yellow-500 rounded-xl p-6 relative overflow-hidden">
+          <div className="mt-8 bg-gradient-to-r from-yellow-900/80 to-orange-900/80 backdrop-blur-md border-2 border-yellow-500 rounded-xl p-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-500/20 rounded-full blur-3xl"></div>
             
             <div className="relative z-10">

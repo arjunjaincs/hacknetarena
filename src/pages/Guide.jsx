@@ -57,6 +57,87 @@ export default function Guide({ onBack }) {
           </div>
         </div>
 
+        {/* Difficulty Levels */}
+        <div className="bg-dark-card border-2 border-cyber-blue rounded-lg p-6 mb-6">
+          <h2 className="text-2xl font-bold text-cyber-blue mb-4">⚙️ Difficulty Levels</h2>
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="bg-green-900/20 border border-green-500/50 rounded p-4">
+              <h3 className="text-lg font-bold text-green-400 mb-2">🟢 Beginner</h3>
+              <ul className="text-sm text-gray-300 space-y-1">
+                <li>• AI makes 30% mistakes</li>
+                <li>• +20 starting energy</li>
+                <li>• Score: ×0.8</li>
+                <li className="text-green-400 text-xs mt-2">Perfect for learning!</li>
+              </ul>
+            </div>
+            <div className="bg-blue-900/20 border border-blue-500/50 rounded p-4">
+              <h3 className="text-lg font-bold text-blue-400 mb-2">🔵 Normal</h3>
+              <ul className="text-sm text-gray-300 space-y-1">
+                <li>• AI makes 15% mistakes</li>
+                <li>• Standard gameplay</li>
+                <li>• Score: ×1.0</li>
+                <li className="text-blue-400 text-xs mt-2">Balanced challenge!</li>
+              </ul>
+            </div>
+            <div className="bg-red-900/20 border border-red-500/50 rounded p-4">
+              <h3 className="text-lg font-bold text-red-400 mb-2">🔴 Expert</h3>
+              <ul className="text-sm text-gray-300 space-y-1">
+                <li>• AI makes 5% mistakes</li>
+                <li>• Smarter AI tactics</li>
+                <li>• Score: ×1.5</li>
+                <li className="text-red-400 text-xs mt-2">For masters only!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Daily Challenges */}
+        <div className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border-2 border-yellow-500 rounded-lg p-6 mb-6">
+          <h2 className="text-2xl font-bold text-yellow-400 mb-4">🏆 Daily Challenges</h2>
+          <p className="text-gray-300 mb-4">Complete unique challenges every 24 hours for <strong className="text-yellow-400">2x score multiplier</strong>!</p>
+          <div className="grid md:grid-cols-2 gap-3 text-sm">
+            <div className="bg-dark-card/50 rounded p-3">
+              <span className="text-yellow-400 font-bold">🚫 No Network Actions</span>
+              <p className="text-gray-400 text-xs mt-1">Win without Network category</p>
+            </div>
+            <div className="bg-dark-card/50 rounded p-3">
+              <span className="text-yellow-400 font-bold">💰 Budget Battle</span>
+              <p className="text-gray-400 text-xs mt-1">Max 12 energy cost actions</p>
+            </div>
+            <div className="bg-dark-card/50 rounded p-3">
+              <span className="text-yellow-400 font-bold">⚡ Speed Run</span>
+              <p className="text-gray-400 text-xs mt-1">Win in under 8 rounds</p>
+            </div>
+            <div className="bg-dark-card/50 rounded p-3">
+              <span className="text-yellow-400 font-bold">🔗 Combo Master</span>
+              <p className="text-gray-400 text-xs mt-1">Trigger 3+ combos</p>
+            </div>
+            <div className="bg-dark-card/50 rounded p-3">
+              <span className="text-yellow-400 font-bold">🛡️ Perfect Defense</span>
+              <p className="text-gray-400 text-xs mt-1">Network stays above 80</p>
+            </div>
+            <div className="bg-dark-card/50 rounded p-3">
+              <span className="text-yellow-400 font-bold">🎲 High Stakes</span>
+              <p className="text-gray-400 text-xs mt-1">50 energy, no regen</p>
+            </div>
+          </div>
+          <p className="text-xs text-yellow-300 mt-4">Build streaks by completing challenges on consecutive days!</p>
+        </div>
+
+        {/* Achievements */}
+        <div className="bg-dark-card border-2 border-purple-500 rounded-lg p-6 mb-6">
+          <h2 className="text-2xl font-bold text-purple-400 mb-4">🎖️ Achievements</h2>
+          <p className="text-gray-300 mb-4">Unlock <strong className="text-purple-400">50+ achievements</strong> across 5 rarity tiers!</p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm">Common</span>
+            <span className="px-3 py-1 bg-green-900/50 text-green-400 border border-green-500 rounded text-sm">Uncommon</span>
+            <span className="px-3 py-1 bg-blue-900/50 text-blue-400 border border-blue-500 rounded text-sm">Rare</span>
+            <span className="px-3 py-1 bg-purple-900/50 text-purple-400 border border-purple-500 rounded text-sm">Epic</span>
+            <span className="px-3 py-1 bg-yellow-900/50 text-yellow-400 border border-yellow-500 rounded text-sm">Legendary</span>
+          </div>
+          <p className="text-sm text-gray-400">Track your progress in your Profile page!</p>
+        </div>
+
         {/* Pro Tips */}
         <div className="bg-dark-card border-2 border-cyber-purple rounded-lg p-6 mb-6">
           <h2 className="text-2xl font-bold text-cyber-purple mb-4">💡 Pro Tips</h2>
