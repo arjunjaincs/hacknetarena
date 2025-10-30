@@ -7,6 +7,17 @@ import { database, isFirebaseEnabled } from './config';
 import { ref, push, set, get, query, orderByChild, limitToLast } from 'firebase/database';
 
 /**
+ * Sanitize player name to avoid storing unexpected characters
+ */
+function sanitizePlayerName(name) {
+  if (!name || typeof name !== 'string') return 'Player';
+  const trimmed = name.trim().slice(0, 20);
+  // Allow letters, numbers, spaces, underscore and hyphen; collapse multiple spaces
+  const cleaned = trimmed.replace(/[^A-Za-z0-9 _-]/g, '').replace(/\s+/g, ' ');
+  return cleaned || 'Player';
+}
+
+/**
  * Submit a score to the leaderboard (updates user's stats)
  * @param {string} playerName - Player's name
  * @param {number} score - Final score
@@ -30,12 +41,14 @@ export async function submitScore(playerName, score, role, won, userId = null) {
     const userStatsRef = ref(database, `leaderboard/${userId}`);
     const snapshot = await get(userStatsRef);
     
+    const safeName = sanitizePlayerName(playerName);
+
     let userData;
     if (snapshot.exists()) {
       // Update existing user
       const existing = snapshot.val();
       userData = {
-        playerName: playerName.substring(0, 20),
+        playerName: safeName,
         userId: userId,
         bestScore: Math.max(existing.bestScore || 0, score),
         totalScore: (existing.totalScore || 0) + score,
@@ -53,7 +66,7 @@ export async function submitScore(playerName, score, role, won, userId = null) {
     } else {
       // New user
       userData = {
-        playerName: playerName.substring(0, 20),
+        playerName: safeName,
         userId: userId,
         bestScore: score,
         totalScore: score,

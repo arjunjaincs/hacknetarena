@@ -44,6 +44,18 @@
 - **Guest Mode**: Play without login, save scores when ready
 - **Firebase Sync**: Real-time score updates
 
+### 🔐 Security Features
+- **Input Sanitization**: All user inputs sanitized to prevent XSS attacks
+- **Firebase Security Rules**: User-specific write permissions, public read for leaderboard
+- **No Dangerous Code**: Zero use of `eval()`, `innerHTML`, or `dangerouslySetInnerHTML`
+- **Environment Variables**: Sensitive config stored in `.env` (not in repo)
+- **Name Validation**: Player names restricted to alphanumeric + spaces/underscore/hyphen (max 20 chars)
+- **Rate Limiting**: Firebase handles request throttling automatically
+- **Secure Authentication**: Firebase Auth with Google OAuth and email/password
+- **Data Validation**: All Firebase writes validated before submission
+- **HTTPS Only**: Deployed on Vercel with automatic HTTPS
+- **No Sensitive Data**: No PII stored, only game stats and scores
+
 ---
 
 ## 🎯 How to Play

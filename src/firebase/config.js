@@ -5,15 +5,20 @@
  * 1. Go to https://console.firebase.google.com/
  * 2. Create a new project (free tier)
  * 3. Enable Realtime Database in the Firebase console
- * 4. Set database rules to allow read/write (for development):
- *    {
- *      "rules": {
- *        ".read": true,
- *        ".write": true
- *      }
- *    }
- * 5. Get your config from Project Settings > General > Your apps > Web app
- * 6. Create a .env file in the root directory with:
+ * 4. Enable Authentication (Google + Email/Password)
+ * 5. Deploy security rules from database.rules.json:
+ *    firebase deploy --only database
+ * 
+ * ⚠️ SECURITY WARNING:
+ * DO NOT use open read/write rules in production!
+ * Always use the rules from database.rules.json which include:
+ * - User-specific write permissions
+ * - Data validation
+ * - Type checking
+ * - Length limits
+ * 
+ * 6. Get your config from Project Settings > General > Your apps > Web app
+ * 7. Create a .env file in the root directory with:
  *    VITE_FIREBASE_API_KEY=your_api_key
  *    VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
  *    VITE_FIREBASE_DATABASE_URL=your_database_url

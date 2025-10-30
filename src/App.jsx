@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import Home from './pages/HomeNew';
+import Home from './pages/Home';
 import Game from './pages/Game';
 import Results from './pages/Results';
 import Leaderboard from './pages/Leaderboard';

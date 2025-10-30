@@ -1,36 +1,28 @@
 /**
- * Home Page
- * Landing page with game introduction and role selection
+ * Modern Home Page - Redesigned
+ * Clean, aesthetic, minimalistic with animations
  */
 
 import React, { useState, useEffect, useRef } from 'react';
 import { playClickSound, initAudio } from '../game/soundEffects';
-import { getUserLeaderboardStats } from '../firebase/leaderboard';
 
-export default function Home({ onStartGame, isLoggedIn = false, playerName: loggedInName = '', userId = null }) {
+export default function Home({ onStartGame, isLoggedIn = false, playerName: loggedInName = '' }) {
   const [selectedRole, setSelectedRole] = useState(null);
   const [playerName, setPlayerName] = useState('');
   const [showNameModal, setShowNameModal] = useState(false);
-  const [userStats, setUserStats] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
   const inputRef = useRef(null);
   
-  // Load user stats if logged in
+  // Fade in animation
   useEffect(() => {
-    async function loadStats() {
-      if (userId) {
-        const stats = await getUserLeaderboardStats(userId);
-        setUserStats(stats);
-      }
-    }
-    loadStats();
-  }, [userId]);
+    setIsVisible(true);
+  }, []);
   
   const handleRoleSelect = (role) => {
-    initAudio(); // Initialize audio on first interaction
+    initAudio();
     playClickSound();
     setSelectedRole(role);
     
-    // If logged in, start game immediately. Otherwise show name modal
     if (isLoggedIn) {
       onStartGame(role, loggedInName);
     } else {
@@ -38,7 +30,6 @@ export default function Home({ onStartGame, isLoggedIn = false, playerName: logg
     }
   };
   
-  // Auto-focus input when modal opens
   useEffect(() => {
     if (showNameModal && inputRef.current) {
       setTimeout(() => inputRef.current.focus(), 100);
@@ -46,161 +37,179 @@ export default function Home({ onStartGame, isLoggedIn = false, playerName: logg
   }, [showNameModal]);
   
   const handleStart = () => {
-    if (selectedRole && playerName.trim()) {
+    const sanitizedName = playerName.trim().slice(0, 20).replace(/[^A-Za-z0-9 _-]/g, '').replace(/\s+/g, ' ');
+    if (selectedRole && sanitizedName) {
       playClickSound();
-      onStartGame(selectedRole, playerName.trim());
+      onStartGame(selectedRole, sanitizedName);
     }
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-dark-bg to-dark-card flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 cyber-glow animated-gradient-text">
-            HackNet Arena
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-300 mb-2">
-            The Human Firewall Challenge
-          </p>
-          <p className="text-gray-400">
-            Learn cybersecurity through interactive gameplay
+    <div className="min-h-screen flex items-center justify-center p-4 pt-24 relative overflow-hidden">
+      {/* Animated gradient orbs */}
+      <div className="absolute top-20 left-20 w-96 h-96 bg-cyber-blue opacity-10 rounded-full blur-3xl animate-pulse"></div>
+      <div className="absolute bottom-20 right-20 w-96 h-96 bg-cyber-purple opacity-10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      
+      <div className={`max-w-6xl w-full transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <div className="inline-block mb-6">
+            <div className="text-7xl md:text-8xl font-black mb-4 bg-gradient-to-r from-cyber-blue via-cyber-purple to-cyber-blue bg-clip-text text-transparent animate-gradient bg-300%">
+              HACKNET
+            </div>
+            <div className="text-4xl md:text-5xl font-light text-gray-300 tracking-widest">
+              ARENA
+            </div>
+          </div>
+          
+          <p className="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto mb-8 leading-relaxed font-medium" style={{ textShadow: '0 0 20px rgba(0, 240, 255, 0.3)' }}>
+            Master cybersecurity through strategic combat
           </p>
           
-          {/* User Stats Display */}
-          {isLoggedIn && userStats && userStats.totalScore > 0 && (
-            <div className="mt-6 inline-flex items-center gap-4 bg-dark-card border border-cyber-blue rounded-lg px-6 py-3">
-              <div className="text-center">
-                <div className="text-xs text-gray-400 font-medium">Best Score</div>
-                <div className="text-xl font-bold text-cyber-blue">{userStats.bestScore}</div>
-              </div>
-              <div className="h-8 w-px bg-gray-600"></div>
-              <div className="text-center">
-                <div className="text-xs text-gray-400 font-medium">Total Score</div>
-                <div className="text-xl font-bold text-cyber-purple">{userStats.totalScore}</div>
-              </div>
-              <div className="h-8 w-px bg-gray-600"></div>
-              <div className="text-center">
-                <div className="text-xs text-gray-400 font-medium">Games</div>
-                <div className="text-xl font-bold text-cyber-green">{userStats.gamesPlayed}</div>
-              </div>
+          {/* Stats */}
+          <div className="flex justify-center gap-8 text-sm text-gray-300 mt-4">
+            <div className="hover:text-cyber-blue transition-colors" style={{ cursor: 'inherit' }}>
+              <span className="font-bold text-2xl text-white block cyber-glow">24</span>
+              <span className="font-semibold" style={{ textShadow: '0 0 10px rgba(255, 255, 255, 0.5)' }}>ACTIONS</span>
             </div>
-          )}
-        </div>
-        
-        {/* Game Description */}
-        <div className="bg-dark-card border border-gray-600 rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-cyber-blue mb-4">🎮 How to Play</h2>
-          <div className="space-y-2 text-gray-300">
-            <p>• Choose your role: <span className="text-cyber-red font-bold">Hacker</span> or <span className="text-cyber-green font-bold">Defender</span></p>
-            <p>• Battle against AI in 5 intense rounds</p>
-            <p>• Select action cards representing real cyber tactics</p>
-            <p>• Learn cybersecurity concepts through gameplay</p>
-            <p>• Compete for the top spot on the leaderboard!</p>
+            <div className="hover:text-cyber-purple transition-colors" style={{ cursor: 'inherit' }}>
+              <span className="font-bold text-2xl text-white block cyber-glow">18</span>
+              <span className="font-semibold" style={{ textShadow: '0 0 10px rgba(255, 255, 255, 0.5)' }}>COMBOS</span>
+            </div>
+            <div className="hover:text-cyber-green transition-colors" style={{ cursor: 'inherit' }}>
+              <span className="font-bold text-2xl text-white block cyber-glow">∞</span>
+              <span className="font-semibold" style={{ textShadow: '0 0 10px rgba(255, 255, 255, 0.5)' }}>ROUNDS</span>
+            </div>
           </div>
         </div>
         
-        {/* Role Selection */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-center text-cyber-blue mb-4">
-            Choose Your Role
-          </h2>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Hacker Role */}
-            <button
-              onClick={() => handleRoleSelect('hacker')}
-              className={`
-                p-6 rounded-lg border-2 transition-all duration-300 btn-cyber
-                ${selectedRole === 'hacker' 
-                  ? 'border-cyber-red bg-cyber-red bg-opacity-20 scale-105' 
-                  : 'border-gray-600 bg-dark-card hover:border-cyber-red hover:scale-105'
-                }
-              `}
-            >
-              <div className="text-6xl mb-4">🎯</div>
-              <h3 className="text-2xl font-bold text-cyber-red mb-2">Hacker</h3>
-              <p className="text-gray-300 mb-4">
-                Breach the network using phishing, malware, and social engineering
-              </p>
-              <div className="text-sm text-gray-400">
-                <div>🎯 Goal: Steal data and reduce network integrity to 0</div>
-                <div>💡 Learn: Attack vectors and exploitation techniques</div>
-              </div>
-            </button>
+        {/* Role Selection Cards */}
+        <div className="grid md:grid-cols-2 gap-8 mb-12">
+          {/* Hacker Card */}
+          <div
+            onClick={() => handleRoleSelect('hacker')}
+            className="group relative bg-gradient-to-br from-red-900/20 to-dark-card border-2 border-red-500/30 rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:border-red-500 hover:shadow-2xl hover:shadow-red-500/20"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 to-red-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             
-            {/* Defender Role */}
-            <button
-              onClick={() => handleRoleSelect('defender')}
-              className={`
-                p-6 rounded-lg border-2 transition-all duration-300 btn-cyber
-                ${selectedRole === 'defender' 
-                  ? 'border-cyber-green bg-cyber-green bg-opacity-20 scale-105' 
-                  : 'border-gray-600 bg-dark-card hover:border-cyber-green hover:scale-105'
-                }
-              `}
-            >
-              <div className="text-6xl mb-4">🛡️</div>
-              <h3 className="text-2xl font-bold text-cyber-green mb-2">Defender</h3>
-              <p className="text-gray-300 mb-4">
-                Protect the network with firewalls, patches, and security training
+            <div className="relative z-10">
+              <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">🎯</div>
+              <h3 className="text-3xl font-bold text-red-400 mb-3">HACKER</h3>
+              <p className="text-red-300 mb-6 leading-relaxed font-medium" style={{ textShadow: '0 0 15px rgba(255, 0, 0, 0.4)' }}>
+                Infiltrate systems, exploit vulnerabilities, and breach defenses
               </p>
-              <div className="text-sm text-gray-400">
-                <div>🛡️ Goal: Maintain network integrity above 60%</div>
-                <div>💡 Learn: Defense strategies and security best practices</div>
+              
+              <div className="space-y-2 text-sm text-red-300">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span style={{ textShadow: '0 0 8px rgba(255, 0, 0, 0.3)' }}>Offensive tactics</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span style={{ textShadow: '0 0 8px rgba(255, 0, 0, 0.3)' }}>High-risk, high-reward</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                  <span style={{ textShadow: '0 0 8px rgba(255, 0, 0, 0.3)' }}>Win by reaching threat 100</span>
+                </div>
               </div>
-            </button>
-          </div>
-        </div>
-        
-        {/* Name Entry Modal */}
-        {showNameModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80 animate-fade-in">
-            <div className="bg-dark-card border-2 border-cyber-blue rounded-lg p-8 max-w-md w-full mx-4 animate-slide-up shadow-2xl">
-              <h2 className="text-2xl font-bold text-cyber-blue mb-4 text-center">
-                {selectedRole === 'hacker' ? '🎯 Hacker' : '🛡️ Defender'} Selected
-              </h2>
-              <p className="text-gray-300 mb-6 text-center">
-                Enter your username to begin the battle
-              </p>
-              <input
-                ref={inputRef}
-                type="text"
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-                placeholder="Enter username..."
-                maxLength={20}
-                className="w-full px-4 py-3 bg-dark-bg border-2 border-cyber-blue rounded-lg text-white text-center focus:outline-none focus:border-cyber-purple mb-6 text-lg"
-                onKeyPress={(e) => e.key === 'Enter' && playerName.trim() && handleStart()}
-              />
-              <div className="flex gap-4">
-                <button
-                  onClick={() => {
-                    setShowNameModal(false);
-                    setSelectedRole(null);
-                    setPlayerName('');
-                  }}
-                  className="flex-1 px-4 py-3 bg-gray-700 text-white font-bold rounded-lg hover:bg-gray-600 transition-all duration-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleStart}
-                  disabled={!playerName.trim()}
-                  className="flex-1 px-4 py-3 bg-cyber-blue text-dark-bg font-bold rounded-lg hover:bg-cyber-purple transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Start Battle 🚀
-                </button>
+              
+              <div className="mt-6 text-red-400 font-bold group-hover:translate-x-2 transition-transform">
+                SELECT →
               </div>
             </div>
           </div>
-        )}
+          
+          {/* Defender Card */}
+          <div
+            onClick={() => handleRoleSelect('defender')}
+            className="group relative bg-gradient-to-br from-green-900/20 to-dark-card border-2 border-green-500/30 rounded-2xl p-8 cursor-pointer transform transition-all duration-300 hover:scale-105 hover:border-green-500 hover:shadow-2xl hover:shadow-green-500/20"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/0 to-green-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            
+            <div className="relative z-10">
+              <div className="text-6xl mb-4 transform group-hover:scale-110 transition-transform">🛡️</div>
+              <h3 className="text-3xl font-bold text-green-400 mb-3">DEFENDER</h3>
+              <p className="text-green-300 mb-6 leading-relaxed font-medium" style={{ textShadow: '0 0 15px rgba(0, 255, 0, 0.4)' }}>
+                Protect networks, patch vulnerabilities, and maintain security
+              </p>
+              
+              <div className="space-y-2 text-sm text-green-300">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <span style={{ textShadow: '0 0 8px rgba(0, 255, 0, 0.3)' }}>Defensive strategies</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <span style={{ textShadow: '0 0 8px rgba(0, 255, 0, 0.3)' }}>Consistent protection</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  <span style={{ textShadow: '0 0 8px rgba(0, 255, 0, 0.3)' }}>Win by keeping threat low</span>
+                </div>
+              </div>
+              
+              <div className="mt-6 text-green-400 font-bold group-hover:translate-x-2 transition-transform">
+                SELECT →
+              </div>
+            </div>
+          </div>
+        </div>
         
-        {/* Footer */}
-        <div className="text-center mt-8 text-gray-500 text-sm">
-          <p>Built for cybersecurity education • Free & Open Source</p>
+        {/* Features */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="bg-dark-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 hover:border-cyber-blue transition-colors">
+            <div className="text-2xl mb-2">⚡</div>
+            <div className="text-xs text-gray-400">FAST-PACED</div>
+          </div>
+          <div className="bg-dark-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 hover:border-cyber-purple transition-colors">
+            <div className="text-2xl mb-2">🧠</div>
+            <div className="text-xs text-gray-400">STRATEGIC</div>
+          </div>
+          <div className="bg-dark-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 hover:border-cyber-green transition-colors">
+            <div className="text-2xl mb-2">🎓</div>
+            <div className="text-xs text-gray-400">EDUCATIONAL</div>
+          </div>
+          <div className="bg-dark-card/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 hover:border-red-500 transition-colors">
+            <div className="text-2xl mb-2">🏆</div>
+            <div className="text-xs text-gray-400">COMPETITIVE</div>
+          </div>
         </div>
       </div>
+      
+      {/* Name Modal */}
+      {showNameModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-dark-card border-2 border-cyber-blue rounded-2xl p-8 max-w-md w-full shadow-2xl shadow-cyber-blue/20 transform animate-scale-in">
+            <h2 className="text-3xl font-bold text-cyber-blue mb-6">Enter Your Name</h2>
+            <input
+              ref={inputRef}
+              type="text"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleStart()}
+              placeholder="CyberWarrior"
+              className="w-full px-6 py-4 bg-dark-bg border-2 border-gray-600 rounded-xl text-white text-lg focus:outline-none focus:border-cyber-blue transition-colors mb-6"
+              maxLength={20}
+            />
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowNameModal(false)}
+                className="flex-1 px-6 py-4 bg-gray-700 text-white rounded-xl hover:bg-gray-600 transition-colors font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleStart}
+                disabled={!playerName.trim()}
+                className="flex-1 px-6 py-4 bg-cyber-blue text-dark-bg rounded-xl hover:bg-cyber-purple transition-colors font-bold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95"
+              >
+                Start Game
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
